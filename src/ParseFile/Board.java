@@ -76,7 +76,6 @@ public class Board {
     private Point findLastInstance(char car, int x, int y) {
         int lastX = x; 
         int lastY = y;
-        char lastInstance = car;
 
         // if the immediate down is the car, look there
         if ((SIZE - 1 > y) && board[x][y + 1] == car) {
@@ -92,12 +91,16 @@ public class Board {
             }
         }
 
-        System.out.println(lastX +" " + lastY);
-
         return new Point(lastX, lastY);
     }
 
+    public ArrayList<Car> getCars() {
+        return carArray;
+    }
 
+    public void setCars(ArrayList<Car> carArray) {
+        this.carArray = carArray;
+    }
     // for debugging
     public void printBoard() {
         for (int i = 0; i < SIZE; i++) {
