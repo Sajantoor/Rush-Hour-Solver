@@ -1,7 +1,7 @@
 package ParseFile;
 
 public class Car {
-    private Point start; // x and y coords, first instance of car => this will be the top most, left most instnace
+    private Point start; // x and y coords, first instance of car => this will be the top most, left most instance
     private Point end;  // x and y coords, last instance of car => this will be the bottom most, right most instance 
     private char name; // name of the car in the board
     private boolean isHorizontal; // the direction the car can move 
@@ -32,10 +32,11 @@ public class Car {
         return this.name;
     }
 
+    /** coords of top most / left most instance */
     public Point getStart() {
         return this.start;
     }
-
+    /** coords of bottom most / right most instance */
     public Point getEnd() {
         return this.end;
     }
