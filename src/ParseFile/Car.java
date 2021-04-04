@@ -4,7 +4,7 @@ import Utility.Constants;
 import java.util.Arrays;
 
 public class Car {
-    private Point coords; // x and y coords, first instance of car => this will be the top most, left most instance
+    private Point coords;  // x and y coords, first instance of car => this will be the top most, left most instance
     private boolean[] size; // values 0 - 5 stores the size of the car (3 bits)
     private boolean[] name; // values A - Z (26 letters, 5 bits) 
     private boolean isHorizontal; // the direction the car can move
@@ -15,6 +15,11 @@ public class Car {
         this.coords = null;
     }
 
+    /** 
+     * @param name The name of the car
+     * @param start The starting (first instance) coordinates of the car of as the class Point 
+     * @param end The last (last instance) coordinates of the car of as the class Point
+     */
     public Car(char name, Point start, Point end) {
         this.size = new boolean[Constants.COORD_BIN_LEN]; 
         this.name = new boolean[Constants.LETTERS_BIN];
@@ -26,24 +31,39 @@ public class Car {
     }
 
     // setters and getters
+    /** 
+     * @param start Coordinates of the first instance of the car as class Point.
+     */
     public void setStart(Point start) {
         this.coords = start;
     }
 
+    /**
+     * @param end: Coordinate of the last instance of the car as class Point.
+     */
     public void setEnd(Point end) {
         // re calculate the direction and calculate size
         calcDirection(end);
         calcSize(end);
     }
 
+    /**
+     * @return name of the car
+     */
     public char getName() {
         return (char) (Functions.binaryToDecimal(this.name, Constants.LETTERS_BIN) + Constants.ASCII_CAPITAL);
     }
 
+    /**
+     * @return Coordinates of the first instance of the car of class Point
+     */
     public Point getStart() {
         return this.coords;
     }
 
+    /**
+     * @return Cooridnates of the last instance of the car of class Point
+     */
     public Point getEnd() {
         int x = this.coords.getX();
         int y = this.coords.getY();
@@ -57,11 +77,19 @@ public class Car {
         return new Point(x, y);
     }
 
+    /**
+     * Gets the direction of the car.
+     * @return Returns true if the car is horizontal, false if vertical.
+     */
     public boolean isHorizontal() {
         return this.isHorizontal;
     }
 
-    // gets the direction of the car
+    /**
+     * Calculates the direction and changes the value of this.isHorizontal. 
+     * Uses it's starting coordinates and ending coordinates to calculate
+     * @param end Cooridnates of the last instance of the car of class Point
+     */
     private void calcDirection(Point end) {
         if (this.coords == null && this.size == null) {
             return; 
@@ -74,6 +102,11 @@ public class Car {
         }
     }
 
+    /**
+     * Calculates the size of the car, requires the direction of the car to be calculated first.
+     * This can be done using {@link #calcDirection(Point)}
+     * @param end Cooridnates of the last instance of the car of class Point
+     */
     private void calcSize(Point end) {
         int size;
 
@@ -87,6 +120,9 @@ public class Car {
     }
 
     @Override
+    /**
+     * @return String with the name, start and end coordinates, and direction of the car (on seperate lines).
+     */
     public String toString() {
         return new String("Name: " + this.getName() + "\nStart: " + coords + "\nEnd: " + this.getEnd() + "\nDir: " + (isHorizontal ? "Horizontal" : "Vertical"));
     }

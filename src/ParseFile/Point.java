@@ -7,7 +7,11 @@ public class Point {
     private boolean[] x; 
     private boolean[] y; 
 
-    // create new point with coords as params
+    /**
+     * Creates a new point 
+     * @param x x coordinate
+     * @param y y coordinate
+     */
     public Point(int x, int y) {
         // 3 bits required for each coord
         this.x = new boolean[Constants.COORD_BIN_LEN]; 
