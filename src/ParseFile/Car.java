@@ -1,31 +1,37 @@
 package ParseFile;
+import Utility.Functions;
+import Utility.Constants;
 
 public class Car {
-    private Point start; // x and y coords, first instance of car => this will be the top most, left most instnace
-    private Point end;  // x and y coords, last instance of car => this will be the bottom most, right most instance 
+    private Point coords; // x and y coords, first instance of car => this will be the top most, left most instance
+    private boolean[] size; // values 0 - 5 stores the size of the car (3 bits)
     private char name; // name of the car in the board
-    private boolean isHorizontal; // the direction the car can move 
+    private boolean isHorizontal; // the direction the car can move
 
     public Car(char name) {
+        this.size = new boolean[Constants.COORD_BIN_LEN]; 
         this.name = name; 
-        this.end = null; 
-        this.start = null;
+        this.coords = null;
     }
 
     public Car(char name, Point start, Point end) {
+        this.size = new boolean[Constants.COORD_BIN_LEN]; 
         this.name = name;
-        this.start = start; 
-        this.end = end;
-        calcDirection();
+        this.coords = start; 
+        calcDirection(end);
+        // calc size requires the end coordinate
+        calcSize(end);
     }
 
     // setters and getters
     public void setStart(Point start) {
-        this.start = start;
+        this.coords = start;
     }
 
     public void setEnd(Point end) {
-        this.end = end;
+        // re calculate the direction and calculate size
+        calcDirection(end);
+        calcSize(end);
     }
 
     public char getName() {
@@ -33,11 +39,20 @@ public class Car {
     }
 
     public Point getStart() {
-        return this.start;
+        return this.coords;
     }
 
     public Point getEnd() {
-        return this.end;
+        int x = this.coords.getX();
+        int y = this.coords.getY();
+
+        if (this.isHorizontal) {
+            x += Functions.binaryToDecimal(this.size, Constants.COORD_BIN_LEN);
+        } else {
+            y += Functions.binaryToDecimal(this.size, Constants.COORD_BIN_LEN);
+        }
+
+        return new Point(x, y);
     }
 
     public boolean isHorizontal() {
@@ -45,20 +60,32 @@ public class Car {
     }
 
     // gets the direction of the car
-    private void calcDirection() {
-        if (this.start == null && this.end == null) {
+    private void calcDirection(Point end) {
+        if (this.coords == null && this.size == null) {
             return; 
         }
 
-        if (this.start.getX() != this.end.getX()) {
+        if (this.coords.getX() != end.getX()) {
             this.isHorizontal = true;
         } else {
             this.isHorizontal = false;
         }
     }
 
+    private void calcSize(Point end) {
+        int size;
+
+        if (this.isHorizontal) {
+            size = end.getX() - this.coords.getX();
+        } else {
+            size = end.getY() - this.coords.getY();
+        }
+
+        Functions.decimalToBinary(this.size, Constants.COORD_BIN_LEN, size);
+    }
+
     // override the to string method
     public String toString() {
-        return new String("Name: " + this.name + "\nStart: " + start + "\nEnd: " + end + "\nDir: " + (isHorizontal ? "Horizontal" : "Vertical"));
+        return new String("Name: " + this.name + "\nStart: " + coords + "\nEnd: " + this.getEnd() + "\nDir: " + (isHorizontal ? "Horizontal" : "Vertical"));
     }
 }
