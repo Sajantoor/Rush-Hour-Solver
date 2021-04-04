@@ -9,22 +9,25 @@ import java.io.FileNotFoundException;
 
 // class with methods to parse a board. 
 public class Board {
-    private char[][] board; 
+    private final int SIZE = 6;
     private ArrayList<Car> carArray; // array of car objects
 
-    // char representation of the board
+    /**
+     * Constructor of the board, used to parse a board file.
+     * @param fileName Filename of the board
+     * @throws Exception Throws an exception if the filename is null or file is not found
+     */
     public Board(String fileName) throws Exception {
         if (fileName == null) {
             throw new FileNotFoundException("File is null in the file constructor.");
-        }        
-        this.board = new char[Constants.SIZE][Constants.SIZE]; // char array representation of the board (temporary)
+        }  
+
+        char[][] board = new char[SIZE][SIZE]; // char array representation of the board
         this.carArray = new ArrayList<Car>();
 
         try {
             File file = new File(fileName);
             Scanner scanner = new Scanner(file);
-
-
             // file exists, scan and add to char array 
             int y = 0; 
             while (scanner.hasNextLine()) {
@@ -42,10 +45,14 @@ public class Board {
             throw new FileNotFoundException("File not found in the file constructor: " + e);
         }
 
-        createObjectsFromBoard();
+        createObjectsFromBoard(board);
     }
 
-    private void createObjectsFromBoard() {
+    /**
+     * Creates Car objects from the char representation of the board array
+     * @param board Char representation of the board
+     */
+    private void createObjectsFromBoard(char[][] board) {
         // parse board
         for (int i = 0; i < Constants.SIZE; i++) { // x
             for (int j = 0; j < Constants.SIZE; j++) { // y
@@ -65,7 +72,7 @@ public class Board {
                     // if not create new car array 
                     if (!foundCar) {
                         Point start = new Point(i, j);
-                        Point end = findLastInstance(car, i, j);
+                        Point end = findLastInstance(board, car, i, j);
                         Car carObject = new Car(car, start, end);
                         carArray.add(carObject);   
                     }
@@ -74,8 +81,15 @@ public class Board {
         }
     }
 
-    // look down, look right to find the last instance of the car
-    private Point findLastInstance(char car, int x, int y) {
+    /**
+     * Finds the last instance of the car by looking right or down.
+     * @param board Char representation of the board
+     * @param car Name of the car
+     * @param x x coordinate of the first instance of the car found
+     * @param y y coordinate of the first instance of the car found
+     * @return Returns a new point with the coordinates of the last instance of the car
+     */
+    private Point findLastInstance(char[][] board, char car, int x, int y) {
         int lastX = x; 
         int lastY = y;
 
@@ -96,10 +110,18 @@ public class Board {
         return new Point(lastX, lastY);
     }
 
+    /**
+     * Gets the board's car array
+     * @return The car array as a array list
+     */
     public ArrayList<Car> getCars() {
         return carArray;
     }
 
+    /**
+     * Sets the board's car array
+     * @param carArray Array list of the new car array
+     */
     public void setCars(ArrayList<Car> carArray) {
         this.carArray = carArray;
     }
@@ -141,9 +163,9 @@ public class Board {
     }
 
     // for debugging
-    public void printBoard() {
-        for (int i = 0; i < Constants.SIZE; i++) {
-            for (int j = 0; j < Constants.SIZE; j++) {
+    private void printBoard(char[][] board) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 System.out.print(board[j][i] + " ");
             }
             System.out.print("\n");
@@ -157,5 +179,27 @@ public class Board {
             System.out.println(carArray.get(i));
             System.out.println("--------------------");
         } 
+    }
+
+    /**
+     * Computes the hashcode for the car array.
+     * @return Returns the hashcode of all the cars' hashcode summed up.
+     */
+    public int computeCarArrayHashCode() {
+        int result = 0;
+        // add up the hashcodes for all the cars in the array
+        for (int i = 0; i < carArray.size(); i++) {
+            result = result * 11 + carArray.get(i).hashCode();
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns the same thing as {@link #computeCarArrayHashCode()}
+     */
+    @Override
+    public int hashCode() {
+        return computeCarArrayHashCode();
     }
 }

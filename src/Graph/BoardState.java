@@ -54,7 +54,6 @@ public class BoardState {
 
     // computes the hash for the given state of the board
     private void computeHash(){
-        //TODO need to implement this method
-        hash = 0;
+        hash = board.hashCode();
     }
 }
