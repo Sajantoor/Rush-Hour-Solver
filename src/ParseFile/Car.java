@@ -1,6 +1,7 @@
 package ParseFile;
 import Utility.Functions;
 import Utility.Constants;
+import java.util.Arrays;
 
 public class Car {
     private Point coords; // x and y coords, first instance of car => this will be the top most, left most instance
@@ -85,8 +86,28 @@ public class Car {
         Functions.decimalToBinary(this.size, Constants.COORD_BIN_LEN, size);
     }
 
-    // override the to string method
+    @Override
     public String toString() {
         return new String("Name: " + this.getName() + "\nStart: " + coords + "\nEnd: " + this.getEnd() + "\nDir: " + (isHorizontal ? "Horizontal" : "Vertical"));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) 
+            return true;
+
+        if (this.hashCode() != o.hashCode()) 
+            return false;
+    
+        if (o == null || this.getClass() != o.getClass()) return false;
+        return isHorizontal == ((Car) o).isHorizontal() && coords.equals(((Car) o).coords) && Arrays.equals(size, ((Car) o).size) && Arrays.equals(name, ((Car) o).name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = coords.hashCode();
+        result = 31 * result + Functions.binaryToDecimal(this.size, 3);
+        result = 31 * result + Functions.binaryToDecimal(this.name, 3);
+        return result;
     }
 }

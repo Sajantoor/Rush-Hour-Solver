@@ -7,22 +7,20 @@ import java.io.FileNotFoundException;
 // class with methods to parse a board. 
 public class Board {
     private final int SIZE = 6; 
-    private char[][] board; 
     private ArrayList<Car> carArray; // array of car objects
 
     // char representation of the board
     public Board(String fileName) throws Exception {
         if (fileName == null) {
             throw new FileNotFoundException("File is null in the file constructor.");
-        }        
-        this.board = new char[SIZE][SIZE]; // char array representation of the board (temporary)
+        }  
+
+        char[][] board = new char[SIZE][SIZE]; // char array representation of the board
         this.carArray = new ArrayList<Car>();
 
         try {
             File file = new File(fileName);
             Scanner scanner = new Scanner(file);
-
-
             // file exists, scan and add to char array 
             int y = 0; 
             while (scanner.hasNextLine()) {
@@ -40,10 +38,10 @@ public class Board {
             throw new FileNotFoundException("File not found in the file constructor: " + e);
         }
 
-        createObjectsFromBoard();
+        createObjectsFromBoard(board);
     }
 
-    private void createObjectsFromBoard() {
+    private void createObjectsFromBoard(char[][] board) {
         // parse board
         for (int i = 0; i < SIZE; i++) { // x
             for (int j = 0; j < SIZE; j++) { // y
@@ -63,7 +61,7 @@ public class Board {
                     // if not create new car array 
                     if (!foundCar) {
                         Point start = new Point(i, j);
-                        Point end = findLastInstance(car, i, j);
+                        Point end = findLastInstance(board, car, i, j);
                         Car carObject = new Car(car, start, end);
                         carArray.add(carObject);   
                     }
@@ -73,7 +71,7 @@ public class Board {
     }
 
     // look down, look right to find the last instance of the car
-    private Point findLastInstance(char car, int x, int y) {
+    private Point findLastInstance(char[][] board, char car, int x, int y) {
         int lastX = x; 
         int lastY = y;
 
@@ -101,8 +99,9 @@ public class Board {
     public void setCars(ArrayList<Car> carArray) {
         this.carArray = carArray;
     }
+
     // for debugging
-    public void printBoard() {
+    private void printBoard(char[][] board) {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 System.out.print(board[j][i] + " ");
@@ -118,5 +117,21 @@ public class Board {
             System.out.println(carArray.get(i));
             System.out.println("--------------------");
         } 
+    }
+
+    // Compute the hashcode for the car array
+    public int computeCarArrayHashCode() {
+        int result = 0;
+        // add up the hashcodes for all the cars in the array
+        for (int i = 0; i < carArray.size(); i++) {
+            result = result * 11 + carArray.get(i).hashCode();
+        }
+
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return computeCarArrayHashCode();
     }
 }
