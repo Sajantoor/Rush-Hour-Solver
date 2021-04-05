@@ -128,16 +128,28 @@ public class Car {
         return new String("Name: " + this.getName() + "\nStart: " + coords + "\nEnd: " + this.getEnd() + "\nDir: " + (isHorizontal ? "Horizontal" : "Vertical"));
     }
 
-    @Override
-    public boolean equals(Object o) {
+    /**
+     * Compares two car objects and determine if they are equal or not
+     * @param o Other car
+     * @return Returns true if the two car objects are equal, false otherwise.
+     */
+    public boolean equals(Car o) {
         if (this == o) 
             return true;
 
+        if (o == null) 
+            return false;
+
         if (this.hashCode() != o.hashCode()) 
             return false;
+
+        if (this.getCoordsHashcode() != ((Car) o).getCoordsHashcode()) 
+            return false;
     
-        if (o == null || this.getClass() != o.getClass()) return false;
-        return isHorizontal == ((Car) o).isHorizontal() && coords.equals(((Car) o).coords) && Arrays.equals(size, ((Car) o).size) && Arrays.equals(name, ((Car) o).name);
+        return isHorizontal == ((Car) o).isHorizontal() && 
+               coords.equals(((Car) o).coords) && 
+               Arrays.equals(size, ((Car) o).size) && 
+               Arrays.equals(name, ((Car) o).name);
     }
 
     @Override
@@ -146,5 +158,12 @@ public class Car {
         result = 31 * result + Functions.binaryToDecimal(this.size, 3);
         result = 31 * result + Functions.binaryToDecimal(this.name, 3);
         return result;
+    }
+
+    /** 
+     * @return Hashcode of the coords (Type point)
+     */
+    public int getCoordsHashcode() {
+        return this.coords.hashCode();
     }
 }

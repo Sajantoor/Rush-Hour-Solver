@@ -36,10 +36,41 @@ public class BoardState {
     /**  in O(1) returns the pre-computed hash for the given state */
     public int hashCode(){return hash;}
 
-    public boolean equals(BoardState other){
-        if(hash != other.hashCode()) return false;
-        // TODO: optimize this
-        return this.board.equals(other.board);
+    public boolean equals(BoardState other) { 
+        // OPTIMIZE:
+        // if you know you won't use the equals method with a null boardstate, delete this: 
+        if (other == null)
+            return false;
+        
+        // same with this if you know you won't the equals method with itself, delete this: 
+        if (other == this) 
+            return true;
+
+        if (hash != other.hashCode()) 
+            return false;
+        
+        // compare hashcode of each car of the cars themselves, would be very very unlikely to get a colision here
+        int carArraySize = this.getBoard().getCars().size();
+        if (carArraySize != other.getBoard().getCars().size()) 
+            return false;
+
+        // go through each car and compare their hashcodes
+        for (int i = 0; i < carArraySize; i++) {
+            if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode()) 
+                return false;
+        }
+
+        // OPTIMIZE: 
+        // i think the above would be enough, this should be fast enough to determine whether or not they are equal but in the extreme case, i've written a bit more. 
+        // Could probably comment this out and test and see if it improves anything or breaks everything lol
+        for (int i = 0; i < carArraySize; i++) {
+            // unreadbale code because i didn't want to import ParseFile.Cars lol 
+            // if the cars are not equal return false
+            if (!this.getBoard().getCars().get(i).equals(other.getBoard().getCars().get(i)))
+                return false;
+        }
+
+        return true;
     }
     /** returns an ArrayList of all board states that can be reached from this one*/
     public ArrayList<BoardState> getReachableStates(){
