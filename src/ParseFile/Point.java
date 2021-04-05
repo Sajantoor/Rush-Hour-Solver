@@ -38,9 +38,12 @@ public class Point {
         Functions.decimalToBinary(this.y, Constants.COORD_BIN_LEN, y);
     }
 
-
-    @Override
-    public boolean equals(Object o) {
+    /** 
+     * Compares two Points and determines if they are equal
+     * @param o Other point 
+     * @return True if they are, false if not
+     */
+    public boolean equals(Point o) {
         if (o == null) {
             return false;
         }
@@ -52,10 +55,7 @@ public class Point {
         if (o.hashCode() != this.hashCode()) 
             return false;
         
-        if (o.getClass() != this.getClass()) 
-            return false;
-        
-        // i don't think the next 2 ifs are needed
+        // OPTIMIZE: i don't think the next 2 ifs are needed
         if (((Point) o).getX() != this.getX()) 
             return false;
         

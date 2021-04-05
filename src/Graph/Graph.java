@@ -10,6 +10,7 @@ public class Graph {
     public Graph(Board board){
         rootState = new BoardState(board);
     }
+
     public BoardState AStarTraversal(){
         // min priorityQueue for A* traversal
         // top element - state with least heuristics
