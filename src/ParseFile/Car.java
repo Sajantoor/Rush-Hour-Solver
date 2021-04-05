@@ -1,7 +1,12 @@
 package ParseFile;
 import Utility.Functions;
 import Utility.Constants;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class Car {
     private Point coords;  // x and y coords, first instance of car => this will be the top most, left most instance
@@ -9,12 +14,24 @@ public class Car {
     private boolean[] name; // values A - Z (26 letters, 5 bits) 
     private boolean isHorizontal; // the direction the car can move
 
+    private Car(@NotNull Car source){
+        isHorizontal = source.isHorizontal;
+        this.size = new boolean[Constants.COORD_BIN_LEN];
+        this.name = new boolean[Constants.LETTERS_BIN];
+
+        for(int i = 0; i < Constants.LETTERS_BIN; ++i)
+            name[i] = source.name[i];
+        for(int i = 0; i < Constants.COORD_BIN_LEN; ++i){
+            size[i] = source.size[i];
+        }
+        coords = new Point(source.coords.getX(), source.coords.getY());
+    }
     public Car(char name) {
         this.size = new boolean[Constants.COORD_BIN_LEN]; 
-        this.name = new boolean[Constants.LETTERS_BIN]; 
+        this.name = new boolean[Constants.LETTERS_BIN];
+        Functions.decimalToBinary(this.name, Constants.LETTERS_BIN, name - Constants.ASCII_CAPITAL);
         this.coords = null;
     }
-
     /** 
      * @param name The name of the car
      * @param start The starting (first instance) coordinates of the car of as the class Point 
@@ -86,6 +103,137 @@ public class Car {
         return this.isHorizontal;
     }
 
+    /**
+     * @return Returns true if the two cars have cells in common
+     */
+    public boolean isWreckedInto(Car another){
+        var startX = getStart().getX();
+        var startY = getStart().getY();
+        var endX = getEnd().getX();
+        var endY = getEnd().getY();
+        var anotherStartX = another.getStart().getX();
+        var anotherStartY = another.getStart().getY();
+        var anotherEndX = another.getEnd().getX();
+        var anotherEndY = another.getEnd().getY();
+
+        if(isHorizontal){
+            if(another.isHorizontal){
+                // both cars are horizontal and are on different rows
+                // wreck is impossible
+                if(startY != anotherStartY)
+                    return false;
+
+                // both cars are on the same row
+                // there is a wreck if their ends are in the same column
+                if(startX == anotherEndX || endX == anotherStartX) return true;
+                else return false;
+            }
+            else {
+                if (startY >= anotherStartY && startY <= anotherEndY) {
+                    if(startX <= anotherStartX && endX >= anotherStartX){
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+        else{
+            if(!another.isHorizontal){
+                // both cars are horizontal and are on different rows
+                // wreck is impossible
+                if(startX != anotherStartX)
+                    return false;
+
+                // both cars are on the same row
+                // there is a wreck if their ends are in the same column
+                if(startY == anotherEndY || endY == anotherStartY) return true;
+                else return false;
+            }
+            else {
+                if (startX >= anotherStartX && startX <= anotherEndX) {
+                    if(startY <= anotherStartY && endY >= anotherStartY){
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+    }
+    /**
+     * @param cars - list of cars to check
+     * @return Returns true if the given car is wrecked into any of the cars from the list
+     */
+    public boolean isWreckedIntoAnyOf(List<Car> cars){
+        // for every car check whether there is a wreck
+        boolean isWreckFound = cars.stream().anyMatch(c -> this.isWreckedInto(c));
+
+        return isWreckFound;
+    }
+    /**
+     * Checks whether the car's coordinates do not go outside of the board
+     * @return true if the car coordinates are legal, false otherwise
+     */
+    public boolean isWithinBounds(){
+        var start = getStart();
+        var end = getEnd();
+        // overboard on the x-coordinate
+        if(start.getX() < 0 || end.getX() >= Constants.SIZE)  return false;
+        // overboard on the y-coordinate
+        if(start.getY() < 0 || end.getY() >= Constants.SIZE) return false;
+
+        return true;
+    }
+    /**
+     * Creates a projection of this car, as if it moved forward
+     * @return null if going overboard, a new car otherwise
+     *
+     */
+    public Car getMoveForwardProjection(){
+       var copy = new Car(this);
+
+       if(isHorizontal){
+           var x = coords.getX() + 1;
+
+            if(x >= 6) return null;
+
+           copy.coords.setX(x);
+       }
+       else{
+           var y = coords.getY() + 1;
+
+           if(y >= 6) return null;
+
+           copy.coords.setY(y);
+       }
+
+       return copy;
+    }
+    /**
+     * Creates a projection of this car, as if it moved backwards
+     * @return null if going overboard, a new car otherwise
+     */
+    public Car getMoveBackwardsProjection(){
+        var copy = new Car(this);
+
+        if(isHorizontal){
+            var x = coords.getX() - 1;
+
+            if(x < 0) return null;
+
+            copy.coords.setX(x);
+        }
+        else{
+            var y = coords.getY() - 1;
+
+            if(y < 0) return null;
+
+            copy.coords.setY(y);
+        }
+
+        return copy;
+    }
     /**
      * Calculates the direction and changes the value of this.isHorizontal. 
      * Uses it's starting coordinates and ending coordinates to calculate

@@ -5,13 +5,12 @@ import ParseFile.Board;
 import java.util.*;
 
 public class Graph {
-    private ArrayList<BoardState> nodes;
     private BoardState rootState;
 
     public Graph(Board board){
         rootState = new BoardState(board);
     }
-    private BoardState AStarTraversal(){
+    public BoardState AStarTraversal(){
         // min priorityQueue for A* traversal
         // top element - state with least heuristics
         // since we are comparing custom classes, need to provide a comparator: compare by totalDistance heuristic
@@ -36,7 +35,7 @@ public class Graph {
             // look at all states reachable from current
             reachableStates.forEach(child -> {
                 // do not process parent
-                if(currentNode.getParent().equals(child)) return;
+                if(currentNode.getParent() != null && currentNode.getParent().equals(child)) return;
 
                 if(explored.containsKey(child.hashCode())){
                     // child is already in closedSet, check if totalDistance can be decreased
@@ -57,8 +56,10 @@ public class Graph {
 
             });
 
+
         }
 
+        // win condition not found
         return null;
     }
 

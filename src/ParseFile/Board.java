@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 
 // class with methods to parse a board. 
 public class Board {
-    private final int SIZE = 6;
     private ArrayList<Car> carArray; // array of car objects
 
     /**
@@ -22,7 +21,7 @@ public class Board {
             throw new FileNotFoundException("File is null in the file constructor.");
         }  
 
-        char[][] board = new char[SIZE][SIZE]; // char array representation of the board
+        char[][] board = new char[Constants.SIZE][Constants.SIZE]; // char array representation of the board
         this.carArray = new ArrayList<Car>();
 
         try {
@@ -46,6 +45,9 @@ public class Board {
         }
 
         createObjectsFromBoard(board);
+    }
+    public Board(ArrayList<Car> carArray){
+        this.carArray = carArray;
     }
 
     /**
@@ -164,14 +166,41 @@ public class Board {
 
     // for debugging
     private void printBoard(char[][] board) {
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                System.out.print(board[j][i] + " ");
+
+        System.out.println("--------------------");
+        for (int i = 0; i < Constants.SIZE; i++) {
+            for (int j = 0; j < Constants.SIZE; j++) {
+                System.out.print(board[i][j] + " ");
             }
             System.out.print("\n");
         }
+        System.out.println("--------------------");
     }
-    
+
+    // for debugging
+    public void printBoard(){
+        char[][] board = new char[Constants.SIZE][Constants.SIZE];
+        for (int i = 0; i < Constants.SIZE; i++) {
+            for (int j = 0; j < Constants.SIZE; j++) {
+                board[i][j] = Constants.EMPTY_FIELD;
+            }
+        }
+
+        carArray.forEach(car -> {
+            var startX = car.getStart().getX();
+            var startY = car.getStart().getY();
+            var endX = car.getEnd().getX();
+            var endY = car.getEnd().getY();
+            var name = car.getName();
+            for(int i = startY; i <= endY; ++i){
+                for(int j = startX; j <= endX; ++j){
+                    board[i][j] = name;
+                }
+            }
+        });
+
+        printBoard(board);
+    }
     // also for debugging
     public void printCarObjects() {
         for (int i = 0; i < carArray.size(); i++) {

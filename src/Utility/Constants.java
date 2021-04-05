@@ -6,7 +6,7 @@ package Utility;
  */
 public class Constants{
     public static final int SIZE = 6;
-    public static final char EMPTY_FIELD = ' ';
+    public static final char EMPTY_FIELD = '.';
     /** Length of the Point.java coordinate binary array */
     public static final int COORD_BIN_LEN = 3; 
     /** Used to convert char to binary array */
