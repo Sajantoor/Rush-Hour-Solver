@@ -1,6 +1,12 @@
 package Utility;
 
-public class Constants {
+// I've made the constants static, so that we don't waste memory by storing them in each state of the board
+/**
+    A set of constants used in the solution
+ */
+public class Constants{
+    public static final int SIZE = 6;
+    public static final char EMPTY_FIELD = '.';
     /** Length of the Point.java coordinate binary array */
     public static final int COORD_BIN_LEN = 3; 
     /** Used to convert char to binary array */
