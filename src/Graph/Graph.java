@@ -23,7 +23,6 @@ public class Graph {
         while(!openQueue.isEmpty()){
             // v has the lowest totalDistance from all nodes
             var currentNode = openQueue.poll();
-
             explored.put(currentNode.hashCode(), currentNode);
 
             // if v is target, then target.totalDistance is lowest in the queue
@@ -44,15 +43,20 @@ public class Graph {
 
                     if(prev.getTotalDistance() > child.getTotalDistance()){
                         // if yes, send back to queue
-                        if(openQueue.contains(prev)) openQueue.remove(prev);
+                        // commented because takes O(N)
+                        //if(openQueue.contains(prev)) openQueue.remove(prev);
 
-                        prev.setCurrentDistance(child.getCurrentDistance());
+                        //prev.setCurrentDistance(child.getCurrentDistance());
 
                         // set parent to current node
                         child.setParent(currentNode);
 
                         openQueue.add(child);
                     }
+                }
+                else{
+                    openQueue.add(child);
+                    explored.put(child.hashCode(), child);
                 }
 
             });
