@@ -122,8 +122,7 @@ public class Car {
     }
 
     /*
-     * =================================== Helper functions for constructing
-     * ===================================
+     * ============== Helper functions for constructing =======================
      */
 
     /**
@@ -163,8 +162,7 @@ public class Car {
     }
 
     /*
-     * =================================== Overrides
-     * ===================================
+     * =========================== Overrides ===================================
      */
 
     @Override
@@ -216,8 +214,7 @@ public class Car {
     }
 
     /*
-     * =================================== Graph projections
-     * ===================================
+     * ================== Graph projections ==========================
      */
 
     /**
@@ -388,9 +385,9 @@ public class Car {
     }
 
     /**
-     * Extention of {@link #getMoveBackwardsProjection()}, instead gets all backwards
-     * projections and adds them to a list, does this until getMoveBackwardsProjection
-     * returns null.
+     * Extention of {@link #getMoveBackwardsProjection()}, instead gets all
+     * backwards projections and adds them to a list, does this until
+     * getMoveBackwardsProjection returns null.
      * 
      * @return List of cars, containing backwards projections, none are NULL.
      */
@@ -408,7 +405,7 @@ public class Car {
                 projectionList.add(projection);
             }
         }
-        
+
         return projectionList;
     }
 }
