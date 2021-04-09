@@ -50,6 +50,7 @@ public class BoardTest {
             System.out.println("Testing: " + filename);
             long start = System.currentTimeMillis();
             Board board = new Board(filename);
+            System.out.println("Parse board: " + (System.currentTimeMillis() - start));
             board.printBoard();
             var boardState = new BoardState(board);
             var reachableStates = boardState.getReachableStates();
@@ -63,6 +64,7 @@ public class BoardTest {
             t.getBoard().printBoard();
 
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+            System.out.println("=========================================================");
         } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
@@ -78,9 +80,10 @@ public class BoardTest {
             long start = System.currentTimeMillis();
 
             Board board = new Board(filename);
+            System.out.println("Parsed board: " + (System.currentTimeMillis() - start));
             var graph = new Graph(board);
             var t = graph.AStarTraversal();
-            
+
             if (t != null) { // null means it failed
                 System.out.println("Success!");
                 System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
@@ -89,6 +92,7 @@ public class BoardTest {
                 return;
             }
 
+            System.out.println("=========================================================");
         } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
