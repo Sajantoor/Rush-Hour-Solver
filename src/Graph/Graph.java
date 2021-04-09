@@ -7,27 +7,28 @@ import java.util.*;
 public class Graph {
     private BoardState rootState;
 
-    public Graph(Board board){
+    public Graph(Board board) {
         rootState = new BoardState(board);
     }
 
-    public BoardState AStarTraversal(){
+    public BoardState AStarTraversal() {
         // min priorityQueue for A* traversal
         // top element - state with least heuristics
-        // since we are comparing custom classes, need to provide a comparator: compare by totalDistance heuristic
+        // since we are comparing custom classes, need to provide a comparator: compare
+        // by totalDistance heuristic
         var openQueue = new PriorityQueue<BoardState>(100, Comparator.comparing(state -> state.getTotalDistance()));
         // states that are in the queue, or were already processed
         var explored = new HashMap<Integer, BoardState>();
 
         openQueue.add(rootState);
-        while(!openQueue.isEmpty()){
+        while (!openQueue.isEmpty()) {
             // v has the lowest totalDistance from all nodes
             var currentNode = openQueue.poll();
             explored.put(currentNode.hashCode(), currentNode);
 
             // if v is target, then target.totalDistance is lowest in the queue
             // so, we have found the optimal solution.
-            if(currentNode.isTarget()){
+            if (currentNode.isTarget()) {
                 return currentNode;
             }
             var reachableStates = currentNode.getReachableStates();
@@ -35,32 +36,31 @@ public class Graph {
             // look at all states reachable from current
             reachableStates.forEach(child -> {
                 // do not process parent
-                if(currentNode.getParent() != null && currentNode.getParent().equals(child)) return;
+                if (currentNode.getParent() != null && currentNode.getParent().equals(child))
+                    return;
 
-                if(explored.containsKey(child.hashCode())){
+                if (explored.containsKey(child.hashCode())) {
                     // child is already in closedSet, check if totalDistance can be decreased
                     var prev = explored.get(child.hashCode());
 
-                    if(prev.getTotalDistance() > child.getTotalDistance()){
+                    if (prev.getTotalDistance() > child.getTotalDistance()) {
                         // if yes, send back to queue
                         // commented because takes O(N)
-                        //if(openQueue.contains(prev)) openQueue.remove(prev);
+                        // if(openQueue.contains(prev)) openQueue.remove(prev);
 
-                        //prev.setCurrentDistance(child.getCurrentDistance());
+                        // prev.setCurrentDistance(child.getCurrentDistance());
 
                         // set parent to current node
                         child.setParent(currentNode);
 
                         openQueue.add(child);
                     }
-                }
-                else{
+                } else {
                     openQueue.add(child);
                     explored.put(child.hashCode(), child);
                 }
 
             });
-
 
         }
 
