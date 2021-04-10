@@ -1,0 +1,51 @@
+Testing: testFIles/A00.txt
+Parsed board: 55
+Success!
+Elapsed time: 119
+=========================================================
+Testing: testFIles/A01.txt
+Parsed board: 1
+Success!
+Elapsed time: 51
+=========================================================
+Testing: testFIles/A02.txt
+Parsed board: 2
+Success!
+Elapsed time: 1766
+=========================================================
+Testing: testFIles/A03.txt
+Parsed board: 1
+Test failed. Time out
+=========================================================
+Testing: testFIles/A04.txt
+Parsed board: 1
+Success!
+Elapsed time: 14
+=========================================================
+Testing: testFIles/A05.txt
+Parsed board: 1
+Success!
+Elapsed time: 17
+=========================================================
+Testing: testFIles/A06.txt
+Parsed board: 1
+Success!
+Elapsed time: 858
+=========================================================
+Testing: testFIles/A07.txt
+Parsed board: 1
+Test failed. Time out
+=========================================================
+Testing: testFIles/A08.txt
+Parsed board: 1
+Test failed. Time out
+=========================================================
+Testing: testFIles/A09.txt
+Parsed board: 1
+Success!
+Elapsed time: 23
+=========================================================
+Testing: testFIles/A10.txt
+Parsed board: 1
+Test failed. Time out
+=========================================================
