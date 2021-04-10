@@ -317,15 +317,17 @@ public class Car {
 
         if (isHorizontal) {
             var x = coords.getX() + 1;
+            var x_end = getEnd().getX() + 1;
 
-            if (x >= 6)
+            if (x_end >= 6)
                 return null;
 
             copy.coords.setX(x);
         } else {
             var y = coords.getY() + 1;
+            var y_end = coords.getY() + 1;
 
-            if (y >= 6)
+            if (y_end >= 6)
                 return null;
 
             copy.coords.setY(y);
