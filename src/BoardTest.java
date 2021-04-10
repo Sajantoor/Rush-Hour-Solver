@@ -1,8 +1,6 @@
 import Graph.*;
 import ParseFile.*;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.concurrent.*;
 
 public class BoardTest {
     public static void main(String[] args) {
@@ -16,9 +14,9 @@ public class BoardTest {
         if (args[0].equals("all")) {
             File dir = new File(folderName);
             File[] directoryListing = dir.listFiles();
+
             // if directory exists
             if (directoryListing != null) {
-                var testsPassed = new ArrayList<String>();
                 // go through all files in directly
                 for (File file : directoryListing) {
                     String name = file.getName();
@@ -30,18 +28,13 @@ public class BoardTest {
                     }
 
                     // run test
-                    boolean passed;
                     if (printing) {
-                        passed = RunTestPrinting(folderName + file.getName());
+                        RunTestPrinting(folderName + file.getName());
                     } else {
-                        passed = RunTest(folderName + file.getName());
+                        RunTest(folderName + file.getName());
                     }
-                    if(passed) testsPassed.add(file.getName());
                 }
-                System.out.println("Passed " + testsPassed.size() + "/" + directoryListing.length + " tests:");
-                testsPassed.forEach(t -> System.out.println(t));
             }
-
         // run test with filename
         } else {
             if (printing) {
@@ -50,11 +43,9 @@ public class BoardTest {
                 RunTest(folderName + args[0]);
             }
         }
-
-        return;
     }
 
-    public static boolean RunTestPrinting(String filename) {
+    public static void RunTestPrinting(String filename) {
         try {
             System.out.println("Testing: " + filename);
             long start = System.currentTimeMillis();
@@ -68,39 +59,22 @@ public class BoardTest {
             });
 
             var graph = new Graph(board);
-
-            var executorService = Executors.newSingleThreadExecutor();
-
-            // allows to asynchronously track time and terminate if working too long
-            var future = executorService.submit(graph::AStarTraversal);
-
-            // to change the time limit change the constant. You can set the units to minutes or ms too
-            var t = future.get(5, TimeUnit.SECONDS);
-
-            executorService.shutdown(); // **java magic**
+            var t = graph.AStarTraversal();
 
             t.getBoard().printBoard();
 
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
             System.out.println("=========================================================");
-
-            return true;
-        }
-        catch (TimeoutException e) {
-            System.out.println("Test failed. Time out");
-
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
         }
 
-        System.out.println("=========================================================");
-        return false;
+        return;
     }
 
-    public static boolean RunTest(String filename) {
+    public static void RunTest(String filename) {
         try {
             System.out.println("Testing: " + filename);
             long start = System.currentTimeMillis();
@@ -108,36 +82,23 @@ public class BoardTest {
             Board board = new Board(filename);
             System.out.println("Parsed board: " + (System.currentTimeMillis() - start));
             var graph = new Graph(board);
-            var executorService = Executors.newSingleThreadExecutor();
-
-            // allows to asynchronously track time and terminate if working too long
-            var future = executorService.submit(graph::AStarTraversal);
-
-            // to change the time limit change the constant. You can set the units to minutes or ms too
-            var t = future.get(20, TimeUnit.SECONDS);
-            executorService.shutdown(); // **java magic**
+            var t = graph.AStarTraversal();
 
             if (t != null) { // null means it failed
                 System.out.println("Success!");
                 System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
-
-                System.out.println("=========================================================");
-                return true;
             } else {
                 System.out.println("Failure... :(");
+                return;
             }
-        }
-        catch (TimeoutException e) {
-            System.out.println("Test failed. Time out");
 
-        }
-        catch (Exception e) {
+            System.out.println("=========================================================");
+        } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
         }
 
-        System.out.println("=========================================================");
-        return false;
+        return;
     }
 }

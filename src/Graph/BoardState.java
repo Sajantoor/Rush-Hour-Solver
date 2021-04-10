@@ -116,7 +116,6 @@ public class BoardState {
 
                     var newState = new BoardState(newCarList);
                     newState.setParent(this);
-                    newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
                     states.add(newState);
                 } else {
