@@ -7,6 +7,7 @@ import java.util.*;
 public class Graph {
     private BoardState rootState;
     private int numberOfVisitedStates;
+
     public Graph(Board board) {
         rootState = new BoardState(board);
     }

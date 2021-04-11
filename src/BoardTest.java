@@ -1,5 +1,6 @@
 import Graph.*;
 import ParseFile.*;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.*;
@@ -40,13 +41,13 @@ public class BoardTest {
                     } else {
                         passed = RunTest(folderName + file.getName());
                     }
-                    if(passed) testsPassed.add(file.getName());
+                    if (passed) testsPassed.add(file.getName());
                 }
                 System.out.println("Passed " + testsPassed.size() + "/" + directoryListing.length + " tests:");
                 testsPassed.forEach(t -> System.out.println(t));
             }
 
-        // run test with filename
+            // run test with filename
         } else {
             if (printing) {
                 RunTestPrinting(folderName + args[0]);
@@ -81,7 +82,7 @@ public class BoardTest {
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
             System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
             System.out.println("Path taken in reverse:");
-            while(t != null){
+            while (t != null) {
                 t.getBoard().printBoard();
                 System.out.println("step " + t.getCurrentDistance());
                 System.out.println("heuristic distance: " + t.getApproximateDistance());
@@ -92,12 +93,10 @@ public class BoardTest {
             System.out.println("=========================================================");
 
             return true;
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             System.out.println("Test failed. Time out");
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
@@ -133,12 +132,10 @@ public class BoardTest {
             } else {
                 System.out.println("Failure... :(");
             }
-        }
-        catch (TimeoutException e) {
+        } catch (TimeoutException e) {
             System.out.println("Test failed. Time out");
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
