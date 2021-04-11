@@ -195,8 +195,8 @@ public class Board {
         var cars = getCars();
 
         // phaseThroughMoves - number of moves to clear the way, if blocking cars were free to move
-        // blockingCars - number of cars blocking the way to exit, or obstructing the way of freeing it
-        var wrapper = new Object(){int blockingCars = 0; int phaseThroughMoves = 0; int freeMoves = 0;};
+        // blockingCars - number of cars blocking the way to exit
+        var wrapper = new Object(){int blockingCars = 0; int phaseThroughMoves = 0;};
         // represents each car by its letter
         boolean[] lookedAt = new boolean[26];
 
@@ -220,7 +220,7 @@ public class Board {
                     // projections.add (car.getMoveBackwardsProjection());
                     // add min number of moves to get to the bottom
                     // including the **infamous** moves
-                    //wrapper.phaseThroughMoves += Constants.SIZE - 1 - bottom;
+                    // wrapper.phaseThroughMoves += Constants.SIZE - 1 - bottom;
 
                     break;
                 }
@@ -242,7 +242,7 @@ public class Board {
                     }
                     else projections.add(forwardProjection.getMoveForwardProjection());
                     // approximate the number of moves needed to be done to 1
-                    //wrapper.phaseThroughMoves++;
+                    // wrapper.phaseThroughMoves++;
                     break;
                 }
             }
@@ -263,7 +263,7 @@ public class Board {
                 }
                 else{
                     // not blocked, so will decrease heuristic
-                    wrapper.freeMoves++;
+                    //wrapper.freeMoves++;
                 }
             });
 
@@ -292,7 +292,7 @@ public class Board {
             });
         }
 
-        return wrapper.blockingCars + wrapper.phaseThroughMoves - wrapper.freeMoves;
+        return wrapper.blockingCars + wrapper.phaseThroughMoves;
     }
 
     // for debugging
