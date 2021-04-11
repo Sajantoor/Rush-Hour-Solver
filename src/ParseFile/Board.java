@@ -138,13 +138,16 @@ public class Board {
 
     // computes the heuristic distance needed for a player car to reach exit
     // currently adds 1 to heuristic whenever there's car on the way
-    // TODO: do something smarter than this, i.e. add number of moves needed to get the car out of the way
+    // TODO: do something smarter than this, i.e. add number of moves needed to get
+    // the car out of the way
     public int getHeuristicDistance() {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
-                .findFirst() // filter will return a *list* with 1 element in it, and this will return the element
-                .get(); // findFirst actually returns a wrapper class that is nullable, to get the Car instance do .get()
+                .findFirst() // filter will return a *list* with 1 element in it, and this will return the
+                             // element
+                .get(); // findFirst actually returns a wrapper class that is nullable, to get the Car
+                        // instance do .get()
 
         var playerCarXEndCoord = playerCar.getEnd().getX();
         var playerCarYCoord = playerCar.getEnd().getY();
@@ -152,7 +155,7 @@ public class Board {
         // compute the heuristic as a distance till exit + 1 per each car in the way
         var heuristic = Constants.SIZE - playerCarXEndCoord - 1;
 
-        // list of cars blocking the way 
+        // list of cars blocking the way
         var carsInTheWay = getCars() // get all cars
                 .stream() // **java magic**
                 .filter(c -> { // filter out the ones not blocking the way
@@ -165,13 +168,16 @@ public class Board {
                             && yStart <= playerCarYCoord && playerCarYCoord <= yEnd; // check that it intersects the row
                     return isOnTheWay;
                 });
-        
-        
-        var wrapper = new Object() { int carValues = 0; int carCount = 0; };
 
-        
-        // basic implemenation of freedom of movement for each car blocking the way and then freedom of movement of that car
-        // TODO: Do something with the number of moves each car has and just something smarter in general lol
+        var wrapper = new Object() {
+            int carValues = 0;
+            int carCount = 0;
+        };
+
+        // basic implemenation of freedom of movement for each car blocking the way and
+        // then freedom of movement of that car
+        // TODO: Do something with the number of moves each car has and just something
+        // smarter in general lol
         carsInTheWay.forEach(car -> {
             var forwardProjection = car.getMoveForwardProjection();
             var backwardsProjection = car.getMoveForwardProjection();
@@ -259,5 +265,54 @@ public class Board {
     @Override
     public int hashCode() {
         return computeCarArrayHashCode();
+    }
+
+    /**
+     * 
+     * @param other A board, same board but different state, find difference between
+     *              them. Other is a state in the future.
+     * @return A string with the differences in the boards
+     */
+    public String findDifference(Board other) {
+        // number of cars is the same
+        ArrayList<Car> thisCarsList = this.getCars();
+        ArrayList<Car> otherCarList = other.getCars();
+
+        // the cars may be in different orders, no point sorting since n is small
+        for (int i = 0; i < thisCarsList.size(); i++) {
+            for (int j = 0; j < otherCarList.size(); j++) {
+
+                Car car = thisCarsList.get(i);
+                Car otherCar = otherCarList.get(j);
+                // if they have different names ignore.
+                if (car.getName() != otherCar.getName()) {
+                    continue;
+                }
+
+                // if they aren't equal => find what's difference and output that
+                if (!car.equals(otherCar)) {
+                    int x = car.getEnd().getX();
+                    int otherX = otherCar.getEnd().getX();
+                    // compare x values
+                    if (x > otherX) {
+                        return new String(car.getName() + "R" + (x - otherX)) + "\n";
+                    } else if (x < otherX) {
+                        return new String(car.getName() + "L" + (otherX - x) + "\n");
+                    }
+
+                    int y = car.getEnd().getY();
+                    int otherY = otherCar.getEnd().getY();
+                    // compare y values
+                    if (y > otherY) {
+                        return new String(car.getName() + "D" + (y - otherY) + "\n");
+                    } else if (y < otherY) {
+                        return new String(car.getName() + "U" + (otherY - y) + "\n");
+                    }
+                }
+            }
+        }
+
+        // they are the same
+        return null;
     }
 }
