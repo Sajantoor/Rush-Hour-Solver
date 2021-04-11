@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 
 public class BoardTest {
+
+    final static int TIME_LIMIT = 20;
+    final static int TIME_LIMIT_PRINTING = 10;
+
     public static void main(String[] args) {
         String folderName = "../testFiles/";
         boolean printing = false;
@@ -61,11 +65,6 @@ public class BoardTest {
             Board board = new Board(filename);
             System.out.println("Parse board: " + (System.currentTimeMillis() - start));
             board.printBoard();
-            var boardState = new BoardState(board);
-            var reachableStates = boardState.getReachableStates();
-            reachableStates.forEach(state -> {
-                state.getBoard().printBoard();
-            });
 
             var graph = new Graph(board);
 
@@ -75,13 +74,21 @@ public class BoardTest {
             var future = executorService.submit(graph::AStarTraversal);
 
             // to change the time limit change the constant. You can set the units to minutes or ms too
-            var t = future.get(5, TimeUnit.SECONDS);
+            var t = future.get(TIME_LIMIT_PRINTING, TimeUnit.SECONDS);
 
             executorService.shutdown(); // **java magic**
 
-            t.getBoard().printBoard();
-
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+            System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+            System.out.println("Path taken in reverse:");
+            while(t != null){
+                t.getBoard().printBoard();
+                System.out.println("step " + t.getCurrentDistance());
+                System.out.println("heuristic distance: " + t.getApproximateDistance());
+                System.out.println("total distance: " + t.getTotalDistance());
+
+                t = t.getParent();
+            }
             System.out.println("=========================================================");
 
             return true;
@@ -114,13 +121,13 @@ public class BoardTest {
             var future = executorService.submit(graph::AStarTraversal);
 
             // to change the time limit change the constant. You can set the units to minutes or ms too
-            var t = future.get(20, TimeUnit.SECONDS);
+            var t = future.get(TIME_LIMIT, TimeUnit.SECONDS);
             executorService.shutdown(); // **java magic**
 
             if (t != null) { // null means it failed
                 System.out.println("Success!");
                 System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
-
+                System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
                 System.out.println("=========================================================");
                 return true;
             } else {

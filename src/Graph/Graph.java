@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Graph {
     private BoardState rootState;
-
+    private int numberOfVisitedStates;
     public Graph(Board board) {
         rootState = new BoardState(board);
     }
@@ -25,6 +25,9 @@ public class Graph {
             // v has the lowest totalDistance from all nodes
             var currentNode = openQueue.poll();
             explored.put(currentNode.hashCode(), currentNode);
+
+            // TODO: remove this in final version, used only in testing
+            numberOfVisitedStates++;
 
             // if v is target, then target.totalDistance is lowest in the queue
             // so, we have found the optimal solution.
@@ -68,4 +71,7 @@ public class Graph {
         return null;
     }
 
+    public int getNumberOfVisitedStates() {
+        return numberOfVisitedStates;
+    }
 }
