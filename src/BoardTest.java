@@ -1,5 +1,6 @@
 import Graph.*;
 import ParseFile.*;
+import Utility.Statistics;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,6 +51,8 @@ public class BoardTest {
             // run test with filename
         } else {
             if (printing) {
+                testBoardStateCreationSpeed();
+                testGetReachableStatesSpeed();
                 RunTestPrinting(folderName + args[0]);
             } else {
                 RunTest(folderName + args[0]);
@@ -81,6 +84,7 @@ public class BoardTest {
 
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
             System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+            System.out.println("Number of boardStates created:" + Statistics.numberOfBoardStatesCreated);
             System.out.println("Path taken in reverse:");
             while (t != null) {
                 t.getBoard().printBoard();
@@ -143,5 +147,46 @@ public class BoardTest {
 
         System.out.println("=========================================================");
         return false;
+    }
+
+    public static void testBoardStateCreationSpeed(){
+        var filename = "../testFiles/B17.txt";
+        final var NUMBER_OF_TESTS = 1000;
+        try {
+            Board board = new Board(filename);
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < NUMBER_OF_TESTS; ++i) {
+                var t = new BoardState(board);
+            }
+            long end = System.currentTimeMillis();
+
+            System.out.println("time elapsed to create a 1000 boards: " + (end - start));
+            System.out.println("=========================================================");
+        }
+        catch (Exception e){
+            System.out.printf("Fail." + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void testGetReachableStatesSpeed(){
+        var filename = "../testFiles/B17.txt";
+        final var NUMBER_OF_TESTS = 100;
+        try {
+            Board board = new Board(filename);
+            var st = new BoardState(board);
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < NUMBER_OF_TESTS; ++i) {
+                var t = st.getReachableStates();
+            }
+            long end = System.currentTimeMillis();
+
+            System.out.println("time elapsed to get reachableStates 100 times: " + (end - start));
+            System.out.println("=========================================================");
+        }
+        catch (Exception e){
+            System.out.printf("Fail." + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

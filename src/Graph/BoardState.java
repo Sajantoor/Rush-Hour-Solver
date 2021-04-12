@@ -2,25 +2,28 @@ package Graph;
 
 import ParseFile.Board;
 import ParseFile.Car;
+import Utility.Statistics;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class BoardState {
     private final Board board;
-    private int approximateDistance;
+    private final int approximateDistance;
     private int currentDistance;
     private int hash;
 
     private BoardState parent;
 
     public BoardState(Board board) {
+        Statistics.numberOfBoardStatesCreated++;
         this.board = board;
         approximateDistance = board.getHeuristicDistance();
         computeHash();
     }
 
     public BoardState(ArrayList<Car> carArray) {
+        Statistics.numberOfBoardStatesCreated++;
         board = new Board(carArray);
         approximateDistance = board.getHeuristicDistance();
         computeHash();
