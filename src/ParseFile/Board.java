@@ -149,7 +149,7 @@ public class Board {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
-                .findFirst() // filter will return a *list* with 1 element in it, and this will return the
+                .findAny() // filter will return a *list* with 1 element in it, and this will return the
                              // element
                 .get(); // findFirst actually returns a wrapper class that is nullable, to get the Car
                         // instance do .get()
@@ -196,7 +196,7 @@ public class Board {
 
         // phaseThroughMoves - number of moves to clear the way, if blocking cars were free to move
         // blockingCars - number of cars blocking the way to exit
-        var wrapper = new Object(){int blockingCars = 0; int phaseThroughMoves = 0;};
+        var wrapper = new Object(){int blockingCars = 0;};
         // represents each car by its letter
         boolean[] lookedAt = new boolean[26];
 
@@ -217,10 +217,6 @@ public class Board {
                     // it can be removed from the way only by going all the way down to the bottom of the board
                     projections = car.getMoveForwardsList();
 
-                    // projections.add (car.getMoveBackwardsProjection());
-                    // add min number of moves to get to the bottom
-                    // including the **infamous** moves
-                    // wrapper.phaseThroughMoves += Constants.SIZE - 1 - bottom;
 
                     break;
                 }
@@ -241,8 +237,6 @@ public class Board {
                         projections.add(backwardsProjection.getMoveBackwardsProjection());
                     }
                     else projections.add(forwardProjection.getMoveForwardProjection());
-                    // approximate the number of moves needed to be done to 1
-                    // wrapper.phaseThroughMoves++;
                     break;
                 }
             }
@@ -260,10 +254,6 @@ public class Board {
                         blockingCarsQueue.add(blockingCar);
                         lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL] = true;
                     }
-                }
-                else{
-                    // not blocked, so will decrease heuristic
-                    //wrapper.freeMoves++;
                 }
             });
 
@@ -292,7 +282,7 @@ public class Board {
             });
         }
 
-        return wrapper.blockingCars + wrapper.phaseThroughMoves;
+        return wrapper.blockingCars;
     }
 
     // for debugging
