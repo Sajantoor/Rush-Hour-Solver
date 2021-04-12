@@ -149,8 +149,10 @@ public class Board {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
-                .findFirst() // filter will return a *list* with 1 element in it, and this will return the element
-                .get(); // findFirst actually returns a wrapper class that is nullable, to get the Car instance do .get()
+                .findFirst() // filter will return a *list* with 1 element in it, and this will return the
+                             // element
+                .get(); // findFirst actually returns a wrapper class that is nullable, to get the Car
+                        // instance do .get()
 
         var playerCarXEndCoord = playerCar.getEnd().getX();
         var playerCarYCoord = playerCar.getEnd().getY();
@@ -158,7 +160,7 @@ public class Board {
         // compute the heuristic as a distance till exit + 1 per each car in the way
         var heuristic = Constants.SIZE - playerCarXEndCoord - 1;
 
-        // list of cars blocking the way 
+        // list of cars blocking the way
         var carsInTheWay = getCars() // get all cars
                 .stream() // **java magic**
                 .filter(c -> { // filter out the ones not blocking the way
@@ -173,8 +175,6 @@ public class Board {
                             && yStart <= playerCarYCoord && playerCarYCoord <= yEnd; // check that it intersects the row
                     return isOnTheWay;
                 });
-        
-
 
         return heuristic  + getCarsBlockedRecursiveHeuristic(carsInTheWay);
     }
@@ -366,5 +366,54 @@ public class Board {
     @Override
     public int hashCode() {
         return computeCarArrayHashCode();
+    }
+
+    /**
+     * 
+     * @param other A board, same board but different state, find difference between
+     *              them. Other is a state in the future.
+     * @return A string with the differences in the boards
+     */
+    public String findDifference(Board other) {
+        // number of cars is the same
+        ArrayList<Car> thisCarsList = this.getCars();
+        ArrayList<Car> otherCarList = other.getCars();
+
+        // the cars may be in different orders, no point sorting since n is small
+        for (int i = 0; i < thisCarsList.size(); i++) {
+            for (int j = 0; j < otherCarList.size(); j++) {
+
+                Car car = thisCarsList.get(i);
+                Car otherCar = otherCarList.get(j);
+                // if they have different names ignore.
+                if (car.getName() != otherCar.getName()) {
+                    continue;
+                }
+
+                // if they aren't equal => find what's difference and output that
+                if (!car.equals(otherCar)) {
+                    int x = car.getEnd().getX();
+                    int otherX = otherCar.getEnd().getX();
+                    // compare x values
+                    if (x > otherX) {
+                        return new String(car.getName() + "R" + (x - otherX)) + "\n";
+                    } else if (x < otherX) {
+                        return new String(car.getName() + "L" + (otherX - x) + "\n");
+                    }
+
+                    int y = car.getEnd().getY();
+                    int otherY = otherCar.getEnd().getY();
+                    // compare y values
+                    if (y > otherY) {
+                        return new String(car.getName() + "D" + (y - otherY) + "\n");
+                    } else if (y < otherY) {
+                        return new String(car.getName() + "U" + (otherY - y) + "\n");
+                    }
+                }
+            }
+        }
+
+        // they are the same
+        return null;
     }
 }
