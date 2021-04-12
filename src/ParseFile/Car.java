@@ -1,7 +1,7 @@
 package ParseFile;
 
 import Utility.Constants;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -181,11 +181,11 @@ public class Car {
         if (this.hashCode() != o.hashCode())
             return false;
 
-        if (this.getCoordsHashcode() != ((Car) o).getCoordsHashcode())
+        if (this.getCoordsHashcode() != o.getCoordsHashcode())
             return false;
 
-        return isHorizontal == ((Car) o).isHorizontal() && coords.equals(((Car) o).coords)
-                && this.size == o.size && this.name == o.name;
+        return isHorizontal == o.isHorizontal() && coords.equals(o.coords)
+                && size == size && name == name;
     }
 
     @Override
@@ -432,5 +432,9 @@ public class Car {
         }
 
         return projectionList;
+    }
+
+    public boolean nameEquals(Car other){
+        return other.getName() == getName();
     }
 }
