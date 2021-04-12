@@ -354,7 +354,7 @@ public class Board {
         int result = 0;
         // add up the hashcodes for all the cars in the array
         for (int i = 0; i < carArray.size(); i++) {
-            result = result * 11 + carArray.get(i).hashCode();
+            result += result * 11 + carArray.get(i).hashCode();
         }
 
         return result;
