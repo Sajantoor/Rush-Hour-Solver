@@ -6,6 +6,7 @@
  * [About](#About)
  * [The Code](#The-Code)
  * [Getting Started](#Getting-Started)
+ * [Test Results](#Test-Results)
 
 ## Teammates
 
@@ -37,6 +38,9 @@ Sajan Toor:
 * Wrote Solver class which is just responsible for input and ouput. 
 ___
 Overall work was split pretty evenly with about 50 - 50 contributions in terms of number of additions and deletions. This can be seen on [Github's contributions](https://github.com/Sajantoor/Rush-Hour-Solver/graphs/contributors) as well as [Github's commits](https://github.com/Sajantoor/Rush-Hour-Solver/commits/main). We didn't just strictly do what was listed, there was some overlap but these were our main contributions.
+
+## About
+Basic overview of the project, strategies, etc.
 
 ## The Code 
 ___
@@ -101,3 +105,45 @@ The first step of the code was to parse the board. This introduces our first cla
 
 `Board` is also responsible for much of the heuristics, but that will be mentioned in the graphing section. 
 ___
+
+`Car` is the next major object. Instead of parsing a char array in each iterator and using for creating reachable states and for the graph traversal, *imagine how much of a pain that would've been*... 
+
+Instead we use `Car` objects!
+
+```java
+    /**
+     * @param name  The name of the car
+     * @param start The starting (first instance) coordinates of the car of as the
+     *              class Point
+     * @param end   The last (last instance) coordinates of the car of as the class
+     *              Point
+     */
+    public Car(char name, Point start, Point end) {
+        ...
+    }
+```
+
+`Car` is a useful class, with a lot of useful methods like `public Point getStart()`, returning a `Point` class with x and y coordinates of the `Car`. Another helpful is `public boolean isWreckedInto(Car another)`, where the `Car` checks if it hit another car, this is useful for creating new states. Some more interesting methods are `getMoveForwardProjection()` and `getMoveBackwardsProjection()`, this method creates a `new Car` while moving the car forward, also useful for creating new states.
+
+In terms of memory the `Car` object doesn't use much, only using 4 bytes for each `Car`. While `char` uses 2 bytes and this excludes all the "empty" areas of the `char[][]` board representation. 
+
+___
+
+`Point` is the last parsing class, it's pretty basic. It's just used for x and y coordinates that are easy to access with `getX()` and `getY()` methods respectively. 
+
+```java
+    /**
+     * Creates a new point
+     * 
+     * @param x x coordinate
+     * @param y y coordinate
+     */
+    public Point(int x, int y) {
+        ...
+    }
+```
+___ 
+
+One of the major changes in the the parsing sections was how information was stored. It started pretty basic with using `int`s to store, x and y coordinates, size, and `char` for name. We quickly realized this would be inefficient for the memory and decided to switch to something else. Based of a stackoverflow post, `boolean` arrays were decided upon. Instead of storing a range of small values in an `int`, we stored them by converting to binary to decimal and converting back when needed. This made it so `Car` only used memory of 15 bits total. However, converting from decimal to binary and binary to decimal was done so often, with at least hundreds of thousands of function calls. Even with the most efficent algorithms to do so, it was inefficent and wasted quite a bit of time. So it was decided on to use the `byte` data type instead, resulting in speed increases of board solving of minimum 100%.
+
+### Graphing
