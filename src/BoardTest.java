@@ -1,8 +1,15 @@
 import Graph.*;
 import ParseFile.*;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.concurrent.*;
 
 public class BoardTest {
+
+    final static int TIME_LIMIT = 20;
+    final static int TIME_LIMIT_PRINTING = 10;
+
     public static void main(String[] args) {
         String folderName = "../testFiles/";
         boolean printing = false;
@@ -14,9 +21,9 @@ public class BoardTest {
         if (args[0].equals("all")) {
             File dir = new File(folderName);
             File[] directoryListing = dir.listFiles();
-
             // if directory exists
             if (directoryListing != null) {
+                var testsPassed = new ArrayList<String>();
                 // go through all files in directly
                 for (File file : directoryListing) {
                     String name = file.getName();
@@ -28,14 +35,19 @@ public class BoardTest {
                     }
 
                     // run test
+                    boolean passed;
                     if (printing) {
-                        RunTestPrinting(folderName + file.getName());
+                        passed = RunTestPrinting(folderName + file.getName());
                     } else {
-                        RunTest(folderName + file.getName());
+                        passed = RunTest(folderName + file.getName());
                     }
+                    if (passed) testsPassed.add(file.getName());
                 }
+                System.out.println("Passed " + testsPassed.size() + "/" + directoryListing.length + " tests:");
+                testsPassed.forEach(t -> System.out.println(t));
             }
-        // run test with filename
+
+            // run test with filename
         } else {
             if (printing) {
                 RunTestPrinting(folderName + args[0]);
@@ -43,38 +55,58 @@ public class BoardTest {
                 RunTest(folderName + args[0]);
             }
         }
+
+        return;
     }
 
-    public static void RunTestPrinting(String filename) {
+    public static boolean RunTestPrinting(String filename) {
         try {
             System.out.println("Testing: " + filename);
             long start = System.currentTimeMillis();
             Board board = new Board(filename);
             System.out.println("Parse board: " + (System.currentTimeMillis() - start));
             board.printBoard();
-            var boardState = new BoardState(board);
-            var reachableStates = boardState.getReachableStates();
-            reachableStates.forEach(state -> {
-                state.getBoard().printBoard();
-            });
 
             var graph = new Graph(board);
-            var t = graph.AStarTraversal();
 
-            t.getBoard().printBoard();
+            var executorService = Executors.newSingleThreadExecutor();
+
+            // allows to asynchronously track time and terminate if working too long
+            var future = executorService.submit(graph::AStarTraversal);
+
+            // to change the time limit change the constant. You can set the units to minutes or ms too
+            var t = future.get(TIME_LIMIT_PRINTING, TimeUnit.SECONDS);
+
+            executorService.shutdown(); // **java magic**
 
             System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+            System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+            System.out.println("Path taken in reverse:");
+            while (t != null) {
+                t.getBoard().printBoard();
+                System.out.println("step " + t.getCurrentDistance());
+                System.out.println("heuristic distance: " + t.getApproximateDistance());
+                System.out.println("total distance: " + t.getTotalDistance());
+
+                t = t.getParent();
+            }
             System.out.println("=========================================================");
+
+            return true;
+        } catch (TimeoutException e) {
+            System.out.println("Test failed. Time out");
+
         } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
         }
 
-        return;
+        System.out.println("=========================================================");
+        return false;
     }
 
-    public static void RunTest(String filename) {
+    public static boolean RunTest(String filename) {
         try {
             System.out.println("Testing: " + filename);
             long start = System.currentTimeMillis();
@@ -82,23 +114,34 @@ public class BoardTest {
             Board board = new Board(filename);
             System.out.println("Parsed board: " + (System.currentTimeMillis() - start));
             var graph = new Graph(board);
-            var t = graph.AStarTraversal();
+            var executorService = Executors.newSingleThreadExecutor();
+
+            // allows to asynchronously track time and terminate if working too long
+            var future = executorService.submit(graph::AStarTraversal);
+
+            // to change the time limit change the constant. You can set the units to minutes or ms too
+            var t = future.get(TIME_LIMIT, TimeUnit.SECONDS);
+            executorService.shutdown(); // **java magic**
 
             if (t != null) { // null means it failed
                 System.out.println("Success!");
                 System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+                System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+                System.out.println("=========================================================");
+                return true;
             } else {
                 System.out.println("Failure... :(");
-                return;
             }
+        } catch (TimeoutException e) {
+            System.out.println("Test failed. Time out");
 
-            System.out.println("=========================================================");
         } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
             e.printStackTrace();
         }
 
-        return;
+        System.out.println("=========================================================");
+        return false;
     }
 }
