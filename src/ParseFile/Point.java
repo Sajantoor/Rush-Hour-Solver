@@ -1,12 +1,8 @@
 package ParseFile;
 
-import Utility.Functions;
-import Utility.Constants;
-
 public class Point {
-    // only need 3 bits to store values from 0 - 5
-    private boolean[] x;
-    private boolean[] y;
+    private byte x;
+    private byte y;
 
     /**
      * Creates a new point
@@ -15,29 +11,25 @@ public class Point {
      * @param y y coordinate
      */
     public Point(int x, int y) {
-        // 3 bits required for each coord
-        this.x = new boolean[Constants.COORD_BIN_LEN];
-        this.y = new boolean[Constants.COORD_BIN_LEN];
-
-        Functions.decimalToBinary(this.x, Constants.COORD_BIN_LEN, x);
-        Functions.decimalToBinary(this.y, Constants.COORD_BIN_LEN, y);
+        this.x = (byte) x;
+        this.y = (byte) y;
     }
 
     // setters and getters
     public int getX() {
-        return Functions.binaryToDecimal(this.x, Constants.COORD_BIN_LEN);
+        return x;
     }
 
     public int getY() {
-        return Functions.binaryToDecimal(this.y, Constants.COORD_BIN_LEN);
+        return y;
     }
 
     public void setX(int x) {
-        Functions.decimalToBinary(this.x, Constants.COORD_BIN_LEN, x);
+        this.x = (byte) x;
     }
 
     public void setY(int y) {
-        Functions.decimalToBinary(this.y, Constants.COORD_BIN_LEN, y);
+        this.y = (byte) y;
     }
 
     /**
@@ -58,13 +50,6 @@ public class Point {
         if (o.hashCode() != this.hashCode())
             return false;
 
-        // OPTIMIZE: i don't think the next 2 ifs are needed
-        if (((Point) o).getX() != this.getX())
-            return false;
-
-        if (((Point) o).getY() != this.getY())
-            return false;
-
         return true;
     }
 
@@ -76,15 +61,15 @@ public class Point {
     public int hashCode() {
         // 7 is the smallest prime bigger than 5 (largest possible values, that's I
         // choose it as the prime).
-        int result = Functions.binaryToDecimal(this.x, Constants.COORD_BIN_LEN);
-        result = 7 * result + Functions.binaryToDecimal(this.y, Constants.COORD_BIN_LEN);
+        int result = x;
+        result = 7 * y;
         return result;
     }
 
     // to string for printing
     @Override
     public String toString() {
-        return new String("X: " + Functions.binaryToDecimal(x, Constants.COORD_BIN_LEN) 
-                        + " Y: " + Functions.binaryToDecimal(y, Constants.COORD_BIN_LEN));
+        return new String("X: " + x 
+                        + " Y: " + y);
     }
 }
