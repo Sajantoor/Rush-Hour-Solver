@@ -191,8 +191,8 @@ public class Car {
     @Override
     public int hashCode() {
         int result = coords.hashCode();
-        result = 31 * result + this.size;
-        result = 31 * result + this.name;
+        result += 31 * result + this.size;
+        result += 31 * result + this.name;
         return result;
     }
 

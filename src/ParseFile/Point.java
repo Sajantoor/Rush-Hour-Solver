@@ -62,7 +62,7 @@ public class Point {
         // 7 is the smallest prime bigger than 5 (largest possible values, that's I
         // choose it as the prime).
         int result = x;
-        result = 7 * y;
+        result += 7 * y;
         return result;
     }
 
