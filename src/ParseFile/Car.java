@@ -5,6 +5,7 @@ import Utility.Constants;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Car {
     private Point coords; // x and y coords, first instance of car => this will be the top most, left most
@@ -289,6 +290,16 @@ public class Car {
     }
 
     /**
+     * Looks for the potential car this one is wrecked into
+     * @return Returns {@link Optional} of a Car.
+     */
+    public Optional<Car> getPotentialWreck(List<Car> cars){
+        return cars.stream()
+                .filter(c -> !this.equals(c) && this.isWreckedInto(c))
+                .findFirst();
+    }
+
+    /**
      * Checks whether the car's coordinates do not go outside of the board
      * 
      * @return true if the car coordinates are legal, false otherwise
@@ -317,15 +328,17 @@ public class Car {
 
         if (isHorizontal) {
             var x = coords.getX() + 1;
+            var x_end = getEnd().getX() + 1;
 
-            if (x >= 6)
+            if (x_end >= 6)
                 return null;
 
             copy.coords.setX(x);
         } else {
             var y = coords.getY() + 1;
+            var y_end = coords.getY() + 1;
 
-            if (y >= 6)
+            if (y_end >= 6)
                 return null;
 
             copy.coords.setY(y);
@@ -359,6 +372,29 @@ public class Car {
         }
 
         return copy;
+    }
+
+    /**
+     * Wrapper around {@link #getMoveForwardProjection} and {@link #getMoveBackwardsProjection()}.
+     * Generates a list of one move projections for this car.
+     * Projections are guaranteed to be within the board
+     *
+     * @return list of projections, all within the board bounds, none are null
+     */
+    public ArrayList<Car> getOneMoveInBoardProjectionList(){
+        var projections = new ArrayList<Car>();
+
+        var forwardProjection = getMoveForwardProjection();
+
+        if(forwardProjection != null && forwardProjection.isWithinBounds())
+            projections.add(forwardProjection);
+
+        var backwardsProjection = getMoveBackwardsProjection();
+
+        if(backwardsProjection != null && backwardsProjection.isWithinBounds())
+            projections.add(backwardsProjection);
+
+        return projections;
     }
 
     /**

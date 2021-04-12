@@ -4,13 +4,15 @@ import Utility.Constants;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
+import java.util.stream.Stream;
 
 // class with methods to parse a board. 
 public class Board {
     private ArrayList<Car> carArray; // array of car objects
-
+    private final int heuristicDistance;
     /**
      * Constructor of the board, used to parse a board file.
      * 
@@ -47,10 +49,14 @@ public class Board {
         }
 
         createObjectsFromBoard(board);
+
+        heuristicDistance = computeHeuristicDistance();
     }
 
     public Board(ArrayList<Car> carArray) {
         this.carArray = carArray;
+
+        heuristicDistance = computeHeuristicDistance();
     }
 
     /**
@@ -138,9 +144,8 @@ public class Board {
 
     // computes the heuristic distance needed for a player car to reach exit
     // currently adds 1 to heuristic whenever there's car on the way
-    // TODO: do something smarter than this, i.e. add number of moves needed to get
-    // the car out of the way
-    public int getHeuristicDistance() {
+    // TODO: do something smarter than this, i.e. add number of moves needed to get the car out of the way
+    private int computeHeuristicDistance() {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
@@ -159,6 +164,8 @@ public class Board {
         var carsInTheWay = getCars() // get all cars
                 .stream() // **java magic**
                 .filter(c -> { // filter out the ones not blocking the way
+                    if(c.getName() == 'X') return false;
+
                     var yStart = c.getStart().getY();
                     var yEnd = c.getEnd().getY();
                     var xEnd = c.getEnd().getX();
@@ -169,32 +176,123 @@ public class Board {
                     return isOnTheWay;
                 });
 
-        var wrapper = new Object() {
-            int carValues = 0;
-            int carCount = 0;
-        };
+        return heuristic  + getCarsBlockedRecursiveHeuristic(carsInTheWay);
+    }
 
-        // basic implemenation of freedom of movement for each car blocking the way and
-        // then freedom of movement of that car
-        // TODO: Do something with the number of moves each car has and just something
-        // smarter in general lol
+    /**
+     * gets a heuristic approximation for the board in O(1)
+     * @return pre-computed integer heuristic approximation
+     */
+    public int getHeuristicDistance(){
+        return heuristicDistance;
+    }
+    /**
+     *
+     * @param carsInTheWay - list of cars blocking the way of the player car, not null
+     * @return approximation on the amount of moves to clear the way
+     */
+    private int getCarsBlockedRecursiveHeuristic(Stream<Car> carsInTheWay){
+        var cars = getCars();
+
+        // phaseThroughMoves - number of moves to clear the way, if blocking cars were free to move
+        // blockingCars - number of cars blocking the way to exit, or obstructing the way of freeing it
+        var wrapper = new Object(){int blockingCars = 0; int phaseThroughMoves = 0; int freeMoves = 0;};
+        // represents each car by its letter
+        boolean[] lookedAt = new boolean[26];
+
+        var blockingCarsQueue = new LinkedList<Car>();
         carsInTheWay.forEach(car -> {
-            var forwardProjection = car.getMoveForwardProjection();
-            var backwardsProjection = car.getMoveForwardProjection();
+            lookedAt[car.getName() - Constants.ASCII_CAPITAL] = true;
+            var top = car.getStart().getY();
+            var bottom = car.getEnd().getY();
+            var size = bottom - top + 1;
 
-            // if going forward is blocked, increase value
-            if (forwardProjection == null || forwardProjection.isWreckedIntoAnyOf(getCars())) {
-                wrapper.carValues++;
+            ArrayList<Car> projections;
+
+            // I tried to do different slightly heuristics depending on size of the car
+            switch (size){
+                case 3: {
+                    // player car is always on row #2
+                    // if a len-3 car is blocking its way, then
+                    // it can be removed from the way only by going all the way down to the bottom of the board
+                    projections = car.getMoveForwardsList();
+
+                    // projections.add (car.getMoveBackwardsProjection());
+                    // add min number of moves to get to the bottom
+                    // including the **infamous** moves
+                    //wrapper.phaseThroughMoves += Constants.SIZE - 1 - bottom;
+
+                    break;
+                }
+                case 2:
+                default:
+                 {
+                    var forwardProjection = car.getMoveForwardProjection();
+                    var backwardsProjection = car.getMoveBackwardsProjection();
+
+                    projections = new ArrayList<>();
+                    // these are never null coz they are len-2 and are in the middle of the board
+                    projections.add(forwardProjection);
+                    projections.add(backwardsProjection);
+
+                    // len-2 car is obstructing way
+                    // to free the road it needs to either move 1 step in one way, or 2 steps in the other way
+                    if(car.getStart().getY() == Constants.PLAYER_CAR_Y_COORD){
+                        projections.add(backwardsProjection.getMoveBackwardsProjection());
+                    }
+                    else projections.add(forwardProjection.getMoveForwardProjection());
+                    // approximate the number of moves needed to be done to 1
+                    //wrapper.phaseThroughMoves++;
+                    break;
+                }
             }
 
-            if (backwardsProjection == null || backwardsProjection.isWreckedIntoAnyOf(getCars())) {
-                wrapper.carValues++;
-            }
+            // checking if the cars blocking main way are blocked:
+            projections.forEach(p -> {
+                var wreck = p.getPotentialWreck(getCars());
+                if(wreck.isPresent()){
+                    var blockingCar = wreck.get();
+                    // blocked, so will increase heuristic
+                    wrapper.blockingCars++;
 
-            wrapper.carCount++;
+                    // for bfs
+                    if(!lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL]) {
+                        blockingCarsQueue.add(blockingCar);
+                        lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL] = true;
+                    }
+                }
+                else{
+                    // not blocked, so will decrease heuristic
+                    wrapper.freeMoves++;
+                }
+            });
+
+            wrapper.blockingCars++;
         });
 
-        return heuristic + wrapper.carCount + wrapper.carValues;
+        while(!blockingCarsQueue.isEmpty()){
+            var car = blockingCarsQueue.poll();
+
+            var projections = car.getOneMoveInBoardProjectionList();
+
+            // almost same thing as the previous loop, but this is for the cars blocking
+            // the cars that are blocking the main path, and so on
+            // i did not try adding the free moves here
+            projections.forEach(p -> {
+                var wreck = p.getPotentialWreck(getCars());
+                if(wreck.isPresent()){
+                    var blockingCar = wreck.get();
+                    wrapper.blockingCars++;
+
+                    if(!lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL]) {
+                        blockingCarsQueue.add(blockingCar);
+                        lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL] = true;
+                    }
+                }
+            });
+        }
+
+        return wrapper.blockingCars + wrapper.phaseThroughMoves - wrapper.freeMoves;
     }
 
     // for debugging
@@ -212,6 +310,19 @@ public class Board {
 
     // for debugging
     public void printBoard() {
+        printBoard(getBoard());
+    }
+
+    // also for debugging
+    public void printCarObjects() {
+        for (int i = 0; i < carArray.size(); i++) {
+            System.out.println("--------------------");
+            System.out.println(carArray.get(i));
+            System.out.println("--------------------");
+        }
+    }
+    // for debugging
+    public char[][] getBoard(){
         char[][] board = new char[Constants.SIZE][Constants.SIZE];
         for (int i = 0; i < Constants.SIZE; i++) {
             for (int j = 0; j < Constants.SIZE; j++) {
@@ -232,18 +343,8 @@ public class Board {
             }
         });
 
-        printBoard(board);
+        return board;
     }
-
-    // also for debugging
-    public void printCarObjects() {
-        for (int i = 0; i < carArray.size(); i++) {
-            System.out.println("--------------------");
-            System.out.println(carArray.get(i));
-            System.out.println("--------------------");
-        }
-    }
-
     /**
      * Computes the hashcode for the car array.
      * 
