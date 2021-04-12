@@ -1,6 +1,5 @@
 package ParseFile;
 
-import Utility.Functions;
 import Utility.Constants;
 import java.util.Arrays;
 import java.util.List;
@@ -10,8 +9,8 @@ import java.util.Optional;
 public class Car {
     private Point coords; // x and y coords, first instance of car => this will be the top most, left most
                           // instance
-    private boolean[] size; // values 0 - 5 stores the size of the car (3 bits)
-    private boolean[] name; // values A - Z (26 letters, 5 bits)
+    private byte size; // size of the car
+    private byte name; // values A - Z (26 letters) 
     private boolean isHorizontal; // the direction the car can move
 
     /*
@@ -23,14 +22,8 @@ public class Car {
      */
     private Car(Car source) {
         isHorizontal = source.isHorizontal;
-        this.size = new boolean[Constants.COORD_BIN_LEN];
-        this.name = new boolean[Constants.LETTERS_BIN];
-
-        for (int i = 0; i < Constants.LETTERS_BIN; ++i)
-            name[i] = source.name[i];
-        for (int i = 0; i < Constants.COORD_BIN_LEN; ++i)
-            size[i] = source.size[i];
-
+        this.size = source.size;
+        this.name = source.name;
         coords = new Point(source.coords.getX(), source.coords.getY());
     }
 
@@ -38,9 +31,7 @@ public class Car {
      * Regular constructor, assumes name is not null.
      */
     public Car(char name) {
-        this.size = new boolean[Constants.COORD_BIN_LEN];
-        this.name = new boolean[Constants.LETTERS_BIN];
-        Functions.decimalToBinary(this.name, Constants.LETTERS_BIN, name - Constants.ASCII_CAPITAL);
+        this.name = (byte) (name - Constants.ASCII_CAPITAL);
         this.coords = null;
     }
 
@@ -52,9 +43,7 @@ public class Car {
      *              Point
      */
     public Car(char name, Point start, Point end) {
-        this.size = new boolean[Constants.COORD_BIN_LEN];
-        this.name = new boolean[Constants.LETTERS_BIN];
-        Functions.decimalToBinary(this.name, Constants.LETTERS_BIN, name - Constants.ASCII_CAPITAL);
+        this.name = (byte) (name - Constants.ASCII_CAPITAL);
         this.coords = start;
         calcDirection(end);
         // calc size requires the end coordinate
@@ -85,7 +74,7 @@ public class Car {
      * @return name of the car
      */
     public char getName() {
-        return (char) (Functions.binaryToDecimal(this.name, Constants.LETTERS_BIN) + Constants.ASCII_CAPITAL);
+        return (char) (name + Constants.ASCII_CAPITAL);
     }
 
     /**
@@ -105,9 +94,9 @@ public class Car {
         int y = this.coords.getY();
 
         if (this.isHorizontal) {
-            x += Functions.binaryToDecimal(this.size, Constants.COORD_BIN_LEN);
+            x += this.size;
         } else {
-            y += Functions.binaryToDecimal(this.size, Constants.COORD_BIN_LEN);
+            y += this.size;
         }
 
         return new Point(x, y);
@@ -141,7 +130,7 @@ public class Car {
             size = end.getY() - this.coords.getY();
         }
 
-        Functions.decimalToBinary(this.size, Constants.COORD_BIN_LEN, size);
+        this.size = (byte) size;
     }
 
     /**
@@ -151,7 +140,7 @@ public class Car {
      * @param end Cooridnates of the last instance of the car of class Point
      */
     private void calcDirection(Point end) {
-        if (this.coords == null && this.size == null) {
+        if (this.coords == null && this.size != 0) {
             return;
         }
 
@@ -196,14 +185,14 @@ public class Car {
             return false;
 
         return isHorizontal == ((Car) o).isHorizontal() && coords.equals(((Car) o).coords)
-                && Arrays.equals(size, ((Car) o).size) && Arrays.equals(name, ((Car) o).name);
+                && this.size == o.size && this.name == o.name;
     }
 
     @Override
     public int hashCode() {
         int result = coords.hashCode();
-        result = 31 * result + Functions.binaryToDecimal(this.size, 3);
-        result = 31 * result + Functions.binaryToDecimal(this.name, 3);
+        result = 31 * result + this.size;
+        result = 31 * result + this.name;
         return result;
     }
 
