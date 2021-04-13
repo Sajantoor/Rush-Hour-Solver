@@ -313,28 +313,56 @@ public class Car {
      * @return null if going overboard, a new car otherwise
      *
      */
-    public Car getMoveForwardProjection() {
+    public CarProjection getMoveForwardProjection(char[][] board) {
         var copy = new Car(this);
+        var x = this.getStart().getX();
+        var y = this.getStart().getY(); 
 
         if (isHorizontal) {
-            var x = coords.getX() + 1;
-            var x_end = getEnd().getX() + 1;
+            // translate by one
+            x += 1;
+            var x_end = this.getEnd().getX() + 1; 
 
-            if (x_end >= 6)
+            // out of bounds error.
+            if (x_end >= Constants.SIZE)
                 return null;
+            
+            // check if x_end doesn't hit another car, moving forward therefore end will be hitting the car first
+            if (board[y][x_end] != Constants.EMPTY_FIELD) {
+                return null;
+            }
 
-            copy.coords.setX(x);
+            copy.getStart().setX(x);
+            // update board
+            board[y][copy.getEnd().getX()] = this.getName(); // add instance at end 
+            board[y][x - 1] = Constants.EMPTY_FIELD; // remove the starting car instance
         } else {
-            var y = coords.getY() + 1;
-            var y_end = coords.getY() + 1;
-
-            if (y_end >= 6)
+            // translate by one
+            y += 1;
+            var y_end = this.getEnd().getY() + 1;
+            
+            // out of bounds error.
+            if (y_end >= Constants.SIZE)
                 return null;
-
-            copy.coords.setY(y);
+            
+            // check if y_end doesn't hit another car, moving down therefore y_end would be hit first.
+            if (board[y_end][x] != Constants.EMPTY_FIELD) {
+                return null;
+            }
+            
+            copy.getStart().setY(y);
+            // update board
+            board[copy.getEnd().getY()][x] = this.getName(); // add instance at end 
+            board[y - 1][x] = Constants.EMPTY_FIELD; // remove the starting car instance
         }
 
-        return copy;
+        for (int i = 0; i < Constants.SIZE; i++) {
+            for (int j = 0; j < Constants.SIZE; j++) {
+                System.out.print(board[i][j]);
+            }
+            System.out.println("");
+        }
+        return new CarProjection(copy, board);
     }
 
     /**
@@ -344,21 +372,23 @@ public class Car {
      */
     public Car getMoveBackwardsProjection() {
         var copy = new Car(this);
+        var x = this.getStart().getX();
+        var y = this.getStart().getY();
 
         if (isHorizontal) {
-            var x = coords.getX() - 1;
+            x -= 1;
 
             if (x < 0)
                 return null;
 
-            copy.coords.setX(x);
+            copy.getStart().setX(x);
         } else {
-            var y = coords.getY() - 1;
+            y -= 1;
 
             if (y < 0)
                 return null;
 
-            copy.coords.setY(y);
+            copy.getStart().setY(y);
         }
 
         return copy;
