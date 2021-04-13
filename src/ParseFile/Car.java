@@ -370,28 +370,43 @@ public class Car {
      * 
      * @return null if going overboard, a new car otherwise
      */
-    public Car getMoveBackwardsProjection() {
+    public CarProjection getMoveBackwardsProjection(char[][] board) {
         var copy = new Car(this);
         var x = this.getStart().getX();
         var y = this.getStart().getY();
 
         if (isHorizontal) {
-            x -= 1;
+            x -= 1; // translate by 1
 
+            // out of bounds error 
             if (x < 0)
                 return null;
+            
+            // if there is an accident
+            if (board[y][x] != Constants.EMPTY_FIELD) {
+                return null;
+            }
 
             copy.getStart().setX(x);
+            board[y][x] = this.getName(); // add instance at start
+            board[y][this.getEnd().getX()] = Constants.EMPTY_FIELD; // remove the last instance.
+
         } else {
             y -= 1;
 
             if (y < 0)
                 return null;
+            
+            if (board[y][x] != Constants.EMPTY_FIELD) {
+                return null;
+            }
 
+            board[y][x] = this.getName(); // add instance at start
+            board[this.getEnd().getX()][x] = Constants.EMPTY_FIELD; // remove last instance.
             copy.getStart().setY(y);
         }
 
-        return copy;
+        return new CarProjection(copy, board);
     }
 
     /**
