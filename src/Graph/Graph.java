@@ -25,7 +25,11 @@ public class Graph {
         while (!openQueue.isEmpty()) {
             // v has the lowest totalDistance from all nodes
             var currentNode = openQueue.poll();
-            explored.put(currentNode.hashCode(), currentNode);
+            if (explored.containsKey(currentNode.hashCode())) {
+                var stored = explored.get(currentNode.hashCode());
+                if (stored.getTotalDistance() < currentNode.getTotalDistance())
+                    continue;
+            } else explored.put(currentNode.hashCode(), currentNode);
 
             // TODO: remove this in final version, used only in testing
             numberOfVisitedStates++;
@@ -45,25 +49,23 @@ public class Graph {
 
                 if (explored.containsKey(child.hashCode())) {
                     // child is already in closedSet, check if totalDistance can be decreased
-                    var prev = explored.get(child.hashCode());
+                    var stored = explored.get(child.hashCode());
 
-                    if (prev.getTotalDistance() > child.getTotalDistance()) {
+                    if (stored.getTotalDistance() > child.getTotalDistance()) {
                         // if yes, send back to queue
-                        // commented because takes O(N)
-                        // if(openQueue.contains(prev)) openQueue.remove(prev);
+                        if (openQueue.contains(stored)) openQueue.remove(stored);
 
-                        // prev.setCurrentDistance(child.getCurrentDistance());
+                        stored.setCurrentDistance(child.getCurrentDistance());
 
                         // set parent to current node
                         child.setParent(currentNode);
-
+                        stored.setParent(currentNode);
                         openQueue.add(child);
                     }
                 } else {
                     openQueue.add(child);
                     explored.put(child.hashCode(), child);
                 }
-
             });
 
         }
