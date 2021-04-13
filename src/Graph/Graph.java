@@ -71,7 +71,35 @@ public class Graph {
         // win condition not found
         return null;
     }
+    public BoardState Bfs() {
+        var queue = new LinkedList<BoardState>();
+        var explored = new HashMap<Integer, BoardState>();
 
+        queue.add(rootState);
+        explored.put(rootState.hashCode(), rootState);
+
+        while (!queue.isEmpty()){
+            var currentNode = queue.poll();
+
+            numberOfVisitedStates++;
+
+            if (currentNode.isTarget()) {
+                return currentNode;
+            }
+            var reachableStates = currentNode.getReachableStates();
+
+            reachableStates.forEach(s -> {
+                if(explored.containsKey(s.hashCode())) return;
+
+                explored.put(s.hashCode(), s);
+
+                s.setParent(currentNode);
+                queue.add(s);
+            });
+        }
+
+        return null;
+    }
     public int getNumberOfVisitedStates() {
         return numberOfVisitedStates;
     }
