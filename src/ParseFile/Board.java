@@ -405,4 +405,16 @@ public class Board {
         // they are the same
         return null;
     }
+
+    public static char[][] boardClone(char[][] board) {
+        char[][] clone = new char[Constants.SIZE][Constants.SIZE];
+        
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                clone[i][j] = board[i][j];
+            }   
+        }
+
+        return clone;
+    }
 }

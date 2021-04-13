@@ -1,6 +1,7 @@
 package ParseFile;
 
 import Utility.Constants;
+import Utility.Statistics;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -310,11 +311,21 @@ public class Car {
     /**
      * Creates a projection of this car, as if it moved forward
      * 
+     * @param board char representation of the baord, not to be changed.
+     * @param createNew Flag where a board copy is created and returned. 
+     * Should be false if calling this method.
      * @return null if going overboard, a new car otherwise
      *
      */
-    public CarProjection getMoveForwardProjection(char[][] board) {
-        var boardCopy = boardClone(board);
+    public CarProjection getMoveForwardProjection(char[][] board, boolean createNew) {
+        char[][] boardCopy; 
+        
+        if (createNew) { // if we are creating a new board, and modifying, create clone
+            boardCopy = Board.boardClone(board);
+        } else {
+            boardCopy = board; // else just use the old board
+        }
+        
         var copy = new Car(this);
         var x = this.getStart().getX();
         var y = this.getStart().getY(); 
@@ -335,8 +346,11 @@ public class Car {
 
             copy.getStart().setX(x);
             // update board
-            boardCopy[y][copy.getEnd().getX()] = this.getName(); // add instance at end 
-            boardCopy[y][x - 1] = Constants.EMPTY_FIELD; // remove the starting car instance
+            
+            if (createNew) {
+                boardCopy[y][copy.getEnd().getX()] = this.getName(); // add instance at end 
+                boardCopy[y][x - 1] = Constants.EMPTY_FIELD; // remove the starting car instance
+            }
         } else {
             // translate by one
             y += 1;
@@ -353,20 +367,35 @@ public class Car {
             
             copy.getStart().setY(y);
             // update board
-            boardCopy[copy.getEnd().getY()][x] = this.getName(); // add instance at end 
-            boardCopy[y - 1][x] = Constants.EMPTY_FIELD; // remove the starting car instance
+            if (createNew) {
+                boardCopy[copy.getEnd().getY()][x] = this.getName(); // add instance at end 
+                boardCopy[y - 1][x] = Constants.EMPTY_FIELD; // remove the starting car instance
+            }
         }
 
-        return new CarProjection(copy, boardCopy);
+        if (createNew) {
+            return new CarProjection(copy, boardCopy);
+        } else {
+            return new CarProjection(copy, null);
+        }
     }
 
     /**
      * Creates a projection of this car, as if it moved backwards
      * 
+     * @param board char representation of the baord, not to be changed.
+     * @param createNew Flag where a board copy is created and returned. 
+     * Should be false if calling this method.
      * @return null if going overboard, a new car otherwise
      */
-    public CarProjection getMoveBackwardsProjection(char[][] board) {
-        var boardCopy = boardClone(board);
+    public CarProjection getMoveBackwardsProjection(char[][] board, boolean createNew) {
+        char[][] boardCopy;
+        if (createNew) {
+            boardCopy = Board.boardClone(board);
+        } else {
+            boardCopy = board;
+        }
+
         var copy = new Car(this);
         var x = this.getStart().getX();
         var y = this.getStart().getY();
@@ -384,8 +413,11 @@ public class Car {
             }
 
             copy.getStart().setX(x);
-            boardCopy[y][x] = this.getName(); // add instance at start
-            boardCopy[y][this.getEnd().getX()] = Constants.EMPTY_FIELD; // remove the last instance.
+
+            if (createNew) {
+                boardCopy[y][x] = this.getName(); // add instance at start
+                boardCopy[y][this.getEnd().getX()] = Constants.EMPTY_FIELD; // remove the last instance.
+            }
         } else {
             y -= 1;
 
@@ -397,11 +429,18 @@ public class Car {
             }
 
             copy.getStart().setY(y);
-            boardCopy[y][x] = this.getName(); // add instance at start
-            boardCopy[this.getEnd().getY()][x] = Constants.EMPTY_FIELD; // remove last instance.
+
+            if (createNew) {
+                boardCopy[y][x] = this.getName(); // add instance at start
+                boardCopy[this.getEnd().getY()][x] = Constants.EMPTY_FIELD; // remove last instance.
+            }
         }
 
-        return new CarProjection(copy, boardCopy);
+        if (createNew) {
+            return new CarProjection(copy, boardCopy);
+        } else {
+            return new CarProjection(copy, null);
+        }
     }
 
     /**
@@ -409,17 +448,18 @@ public class Car {
      * Generates a list of one move projections for this car.
      * Projections are guaranteed to be within the board
      *
+     * @param board char representation of the baord, not to be changed.
      * @return list of projections, all within the board bounds, none are null
      */
     public ArrayList<Car> getOneMoveInBoardProjectionList(char[][] board) {
         var projections = new ArrayList<Car>();
 
-        var forwardProjection = getMoveForwardProjection(board);
+        var forwardProjection = getMoveForwardProjection(board, false);
 
         if (forwardProjection != null) 
             projections.add(forwardProjection.getCar());
 
-        var backwardsProjection = getMoveBackwardsProjection(board);
+        var backwardsProjection = getMoveBackwardsProjection(board, false);
 
         if (backwardsProjection != null)
             projections.add(backwardsProjection.getCar());
@@ -432,19 +472,20 @@ public class Car {
      * projections and adds them to a list, does this until getMoveForwardProjection
      * returns null.
      * 
+     * @param board char representation of the baord, not to be changed.
      * @return List of cars, containing forward projections, none are NULL.
      */
     public ArrayList<Car> getMoveForwardsList(char[][] board) {
-        char[][] boardCopy = boardClone(board);
+        char[][] boardCopy = Board.boardClone(board);
         ArrayList<Car> projectionList = new ArrayList<Car>();
         Car projection = this;
 
         // create forward projections until hit out of bounds, then add to list!
         while (projection != null) {
-            CarProjection carProjection = projection.getMoveForwardProjection(boardCopy);
+            CarProjection carProjection = projection.getMoveForwardProjection(boardCopy, true);
             if (carProjection != null) {
+                // boardCopy = carProjection.getBoard(); // get next board 
                 projection = carProjection.getCar(); // get next car
-                boardCopy = carProjection.getBoard(); // get next board 
                 projectionList.add(projection); // add to list
             } else {
                 projection = null; // stopping condition for the loop.
@@ -459,21 +500,22 @@ public class Car {
      * backwards projections and adds them to a list, does this until
      * getMoveBackwardsProjection returns null.
      * 
+     * @param board char representation of the baord, not to be changed.
      * @return List of cars, containing backwards projections, none are NULL.
      */
 
     public ArrayList<Car> getMoveBackwardsList(char[][] board) {
-        char[][] boardCopy = boardClone(board);
+        char[][] boardCopy = Board.boardClone(board);
         ArrayList<Car> projectionList = new ArrayList<Car>();
         Car projection = this;
 
         // create forward projections until hit out of bounds, then add to list!
         while (projection != null) {
-            CarProjection carProjection = projection.getMoveBackwardsProjection(boardCopy);
+            CarProjection carProjection = projection.getMoveBackwardsProjection(boardCopy, true);
             
             if (carProjection != null) {
+                // boardCopy = carProjection.getBoard(); // get the next board
                 projection = carProjection.getCar(); // get the next car
-                boardCopy = carProjection.getBoard(); // get the next board
                 projectionList.add(projection); // add to the list iff it's not null
             } else {
                 projection = null; // stopping condition for the loop.
@@ -485,18 +527,5 @@ public class Car {
 
     public boolean nameEquals(Car other){
         return other.getName() == getName();
-    }
-
-    // move to board.java later
-    public static char[][] boardClone(char[][] board) {
-        char[][] clone = new char[Constants.SIZE][Constants.SIZE];
-        
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                clone[i][j] = board[i][j];
-            }   
-        }
-
-        return clone;
     }
 }
