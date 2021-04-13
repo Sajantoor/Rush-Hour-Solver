@@ -95,13 +95,14 @@ public class BoardState {
         var states = new ArrayList<BoardState>();
         var carList = board.getCars();
         var iterator = carList.iterator();
+        var charBoard = board.getBoard();
 
         while (iterator.hasNext()) {
             var car = iterator.next();
 
             // try to move the car forward and backwards
-            var forwardList = car.getMoveForwardsList();
-            var backwardsList = car.getMoveBackwardsList();
+            var forwardList = car.getMoveForwardsList(charBoard);
+            var backwardsList = car.getMoveBackwardsList(charBoard);
 
             // all the cars on the board except for the one we are trying to move
             var restOfTheCarsStream = carList.stream().filter(c -> !c.equals(car));
@@ -110,9 +111,7 @@ public class BoardState {
             // for each forward projection check validaty and create new state
             for (Car forwardProjection : forwardList) {
                 // TODO: a better way instead of comparison with null?
-                if (forwardProjection != null && forwardProjection.isWithinBounds() // if forward projection does not go overboard
-                        && !forwardProjection.isWreckedIntoAnyOf(restOfTheCars)) // and does not hit any of the other cars
-                {
+                if (forwardProjection != null) {
                     // generate a new board state with this projection instead of the car
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(forwardProjection);
@@ -122,17 +121,12 @@ public class BoardState {
                     newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
                     states.add(newState);
-                } else {
-                   // fixes the imfamous phasing through cars bug, uses the fact they are ordered anyways
-                   break;
-                }
+                } 
             }
 
             for (Car backwardsProjection : backwardsList) {
                 // TODO: a better way instead of comparison with null?
-                if (backwardsProjection != null && backwardsProjection.isWithinBounds() // if backwards projection does not go overboard
-                        && !backwardsProjection.isWreckedIntoAnyOf(restOfTheCars)) // and does not hit any of the other cars
-                {
+                if (backwardsProjection != null) {
                     // generate a new board state with this projection instead of the car
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(backwardsProjection);
@@ -142,10 +136,7 @@ public class BoardState {
                     newState.setCurrentDistance(this.currentDistance + 1);
                     // add it to the reachable states list
                     states.add(newState);
-                } else {
-                    // fixes the imfamous phasing through cars bug, uses the fact they are ordered anyways
-                    break;
-                }
+                } 
             }
 
         }
