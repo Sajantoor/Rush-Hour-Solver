@@ -171,6 +171,7 @@ public class Car {
      * @param o Other car
      * @return Returns true if the two car objects are equal, false otherwise.
      */
+
     public boolean equals(Car o) {
         if (this == o)
             return true;
@@ -185,14 +186,14 @@ public class Car {
             return false;
 
         return isHorizontal == o.isHorizontal() && coords.equals(o.coords)
-                && size == size && name == name;
+                && this.size == o.size && this.name == o.name;
     }
 
     @Override
     public int hashCode() {
-        int result = coords.hashCode();
-        result += 31 * result + this.size;
-        result += 31 * result + this.name;
+        int result = this.name;
+        result = 31 * result + this.size;
+        result = 31 * result + this.getCoordsHashcode();
         return result;
     }
 

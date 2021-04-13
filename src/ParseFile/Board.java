@@ -25,7 +25,7 @@ public class Board {
             throw new FileNotFoundException("File is null in the file constructor.");
         }
 
-        char[][] board = new char[Constants.SIZE][Constants.SIZE]; // char array representation of the board
+        char[][] board = new char[Constants.SIZE][Constants.SIZE];
         this.carArray = new ArrayList<Car>();
 
         try {
@@ -55,7 +55,6 @@ public class Board {
 
     public Board(ArrayList<Car> carArray) {
         this.carArray = carArray;
-
         heuristicDistance = computeHeuristicDistance();
     }
 
@@ -312,7 +311,7 @@ public class Board {
         }
     }
     // for debugging
-    public char[][] getBoard(){
+    public char[][] getBoard() {
         char[][] board = new char[Constants.SIZE][Constants.SIZE];
         for (int i = 0; i < Constants.SIZE; i++) {
             for (int j = 0; j < Constants.SIZE; j++) {
@@ -344,7 +343,7 @@ public class Board {
         int result = 0;
         // add up the hashcodes for all the cars in the array
         for (int i = 0; i < carArray.size(); i++) {
-            result += result * 11 + carArray.get(i).hashCode();
+            result = result * 47 + carArray.get(i).hashCode();
         }
 
         return result;
