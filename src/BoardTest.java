@@ -70,30 +70,66 @@ public class BoardTest {
             System.out.println("Parse board: " + (System.currentTimeMillis() - start));
             board.printBoard();
 
-            var graph = new Graph(board);
-
             var executorService = Executors.newSingleThreadExecutor();
 
-            // allows to asynchronously track time and terminate if working too long
-            var future = executorService.submit(graph::AStarTraversal);
+            System.out.println("*========================* BFS *============================*");
+            try {
+                start = System.currentTimeMillis();
+                var graph = new Graph(board);
+                // allows to asynchronously track time and terminate if working too long
+                var future = executorService.submit(graph::Bfs);
 
-            // to change the time limit change the constant. You can set the units to minutes or ms too
-            var t = future.get(TIME_LIMIT_PRINTING, TimeUnit.SECONDS);
+                // to change the time limit change the constant. You can set the units to minutes or ms too
+                var t = future.get(TIME_LIMIT_PRINTING, TimeUnit.SECONDS);
+
+                System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+                System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+                System.out.println("Number of boardStates created:" + Statistics.numberOfBoardStatesCreated);
+                System.out.println("Path taken in reverse:");
+
+                while (t != null) {
+                    t.getBoard().printBoard();
+                    System.out.println("step " + t.getCurrentDistance());
+                    System.out.println("heuristic distance: " + t.getApproximateDistance());
+                    System.out.println("total distance: " + t.getTotalDistance());
+
+                    t = t.getParent();
+                }
+            }
+            catch (TimeoutException e) {
+                System.out.println("Failed. Time out");
+            }
+            System.out.println("*========================* A star *============================*");
+            try {
+                start = System.currentTimeMillis();
+                var graph = new Graph(board);
+                Statistics.numberOfBoardStatesCreated = 0;
+                // allows to asynchronously track time and terminate if working too long
+                var future = executorService.submit(graph::AStarTraversal);
+
+                // to change the time limit change the constant. You can set the units to minutes or ms too
+                var t = future.get(TIME_LIMIT_PRINTING, TimeUnit.SECONDS);
+
+                System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
+                System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
+                System.out.println("Number of boardStates created:" + Statistics.numberOfBoardStatesCreated);
+                System.out.println("Path taken in reverse:");
+
+                while (t != null) {
+                    t.getBoard().printBoard();
+                    System.out.println("step " + t.getCurrentDistance());
+                    System.out.println("heuristic distance: " + t.getApproximateDistance());
+                    System.out.println("total distance: " + t.getTotalDistance());
+
+                    t = t.getParent();
+                }
+            }
+            catch (TimeoutException e) {
+                System.out.println("Failed. Time out");
+            }
 
             executorService.shutdown(); // **java magic**
 
-            System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
-            System.out.println("Number of states the traversal has visited: " + graph.getNumberOfVisitedStates());
-            System.out.println("Number of boardStates created:" + Statistics.numberOfBoardStatesCreated);
-            System.out.println("Path taken in reverse:");
-            while (t != null) {
-                t.getBoard().printBoard();
-                System.out.println("step " + t.getCurrentDistance());
-                System.out.println("heuristic distance: " + t.getApproximateDistance());
-                System.out.println("total distance: " + t.getTotalDistance());
-
-                t = t.getParent();
-            }
             System.out.println("=========================================================");
 
             return true;
