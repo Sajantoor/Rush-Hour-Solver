@@ -39,7 +39,7 @@ public class Graph {
             if (currentNode.isTarget()) {
                 return currentNode;
             }
-            var reachableStates = currentNode.getReachableStates();
+            var reachableStates = currentNode.getReachableStates(true);
 
             // look at all states reachable from current
             reachableStates.forEach(child -> {
@@ -88,7 +88,7 @@ public class Graph {
             if (currentNode.isTarget()) {
                 return currentNode;
             }
-            var reachableStates = currentNode.getReachableStates();
+            var reachableStates = currentNode.getReachableStates(false);
 
             reachableStates.forEach(s -> {
                 if(explored.containsKey(s.hashCode())) return;
