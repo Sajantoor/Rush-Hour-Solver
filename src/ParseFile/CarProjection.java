@@ -1,14 +1,14 @@
 package ParseFile;
 
 public class CarProjection {
-    private Car car; 
+    private Car car;
     private char[][] board;
 
     public CarProjection(Car car, char[][] board) {
         this.car = car;
         this.board = board;
     }
-    
+
     public Car getCar() {
         return car;
     }

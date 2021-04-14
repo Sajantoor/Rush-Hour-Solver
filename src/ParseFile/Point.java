@@ -53,10 +53,10 @@ public class Point {
         return true;
     }
 
-    // Largest value would be 5 * 7 + 5 => 40 => 6 bits in binary which could be
-    // stored instead of x and y (same memory)
-    // if accessing hashcode is more important then x and y values => Can easily
-    // compute x and y from hashcode.
+    /**
+     * 
+     * @return Hashcode for the Point object
+     */
     @Override
     public int hashCode() {
         int result = x;
@@ -64,10 +64,13 @@ public class Point {
         return result;
     }
 
-    // to string for printing
+    /**
+     * To string used for printing
+     * 
+     * @return string of the coordinates
+     */
     @Override
     public String toString() {
-        return new String("X: " + x 
-                        + " Y: " + y);
+        return new String("X: " + x + " Y: " + y);
     }
 }

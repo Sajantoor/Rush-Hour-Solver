@@ -2,10 +2,8 @@ package Graph;
 
 import ParseFile.Board;
 import ParseFile.Car;
-import Utility.Statistics;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class BoardState {
     private final Board board;
@@ -15,24 +13,22 @@ public class BoardState {
 
     private BoardState parent;
 
+    /**
+     * 
+     * @param board creates a new board state from a board
+     */
     public BoardState(Board board) {
-        Statistics.numberOfBoardStatesCreated++;
         this.board = board;
         approximateDistance = board.getHeuristicDistance();
         computeHash();
     }
 
+    /**
+     * 
+     * @param carArray Creates a new board state from a car array
+     */
     public BoardState(ArrayList<Car> carArray) {
-        Statistics.numberOfBoardStatesCreated++;
         board = new Board(carArray);
-        approximateDistance = board.getHeuristicDistance();
-        computeHash();
-    }
-
-    public BoardState(ArrayList<Car> carArray, boolean shouldComputeDecentHeuristic){
-
-        Statistics.numberOfBoardStatesCreated++;
-        board = new Board(carArray,shouldComputeDecentHeuristic);
         approximateDistance = board.getHeuristicDistance();
         computeHash();
     }
@@ -45,12 +41,14 @@ public class BoardState {
     public int getApproximateDistance() {
         return approximateDistance;
     }
-    public void setApproximateDistance(int approximateDistance){
+
+    public void setApproximateDistance(int approximateDistance) {
         this.board.setHeuristicDistance(approximateDistance);
         this.approximateDistance = approximateDistance;
     }
-    public void computeDecentApproximateDistance(){
-        this.board.setHeuristicDistance(this.board.computeHeuristicDistance(true));
+
+    public void computeApproximateDistance() {
+        this.board.setHeuristicDistance(this.board.computeHeuristicDistance());
         this.approximateDistance = this.board.getHeuristicDistance();
     }
 
@@ -85,6 +83,12 @@ public class BoardState {
         return hash;
     }
 
+    /**
+     * Checks if two boards are equal
+     * 
+     * @param other board
+     * 
+     */
     public boolean equals(BoardState other) {
         if (hash != other.hashCode())
             return false;
@@ -95,15 +99,14 @@ public class BoardState {
         if (carArraySize != other.getBoard().getCars().size())
             return false;
 
-        // // go through each car and compare their hashcodes
-        // for (int i = 0; i < carArraySize; i++) {
-        //     if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode())
-        //         return false;
-        // }
-
         return true;
     }
 
+    /**
+     * 
+     * @param original what you want to clone
+     * @return Clone of the car array list
+     */
     private static ArrayList<Car> carListClone(ArrayList<Car> original) {
         ArrayList<Car> clone = new ArrayList<Car>();
 
@@ -115,7 +118,7 @@ public class BoardState {
     }
 
     /**
-     * returns an ArrayList of all board states that can be reached from this one
+     * @return an ArrayList of all board states that can be reached from this one
      */
     public ArrayList<BoardState> getReachableStates(boolean shouldCreateDecentHeuristics) {
         var states = new ArrayList<BoardState>();
@@ -141,34 +144,28 @@ public class BoardState {
             var forwardList = car.getMoveForwardsList(charBoard);
             var backwardsList = car.getMoveBackwardsList(charBoard);
 
-            // for each forward projection check validaty and create new state
+            // for each forward projection create new state
             for (Car forwardProjection : forwardList) {
-                if (forwardProjection != null) {
-                    var nextList = carListClone(carList);
-                    // generate a new board state with this projection instead of the car
-                    nextList.set(index, forwardProjection);
-
-                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
-                    newState.setParent(this);
-                    newState.setCurrentDistance(currentDistance + 1);
-                    // add it to the reachable states list
-                    states.add(newState);
-                } 
+                var nextList = carListClone(carList);
+                nextList.set(index, forwardProjection);
+                // generate a new board state with this projection instead of the car
+                var newState = new BoardState(nextList);
+                newState.setParent(this);
+                newState.setCurrentDistance(currentDistance + 1);
+                // add it to the reachable states list
+                states.add(newState);
             }
 
+            // for each backward projection create new state
             for (Car backwardsProjection : backwardsList) {
-                if (backwardsProjection != null) {
-                    // generate a new board state with this projection instead of the car
-                    var nextList = carListClone(carList);
-                    // generate a new board state with this projection instead of the car
-                    nextList.set(index, backwardsProjection);
-
-                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
-                    newState.setParent(this);
-                    newState.setCurrentDistance(this.currentDistance + 1);
-                    // add it to the reachable states list
-                    states.add(newState);
-                } 
+                var nextList = carListClone(carList);
+                nextList.set(index, backwardsProjection);
+                // generate a new board state with this projection instead of the car
+                var newState = new BoardState(nextList);
+                newState.setParent(this);
+                newState.setCurrentDistance(this.currentDistance + 1);
+                // add it to the reachable states list
+                states.add(newState);
             }
 
         }

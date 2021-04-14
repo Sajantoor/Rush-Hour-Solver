@@ -6,12 +6,16 @@ import java.util.*;
 
 public class Graph {
     private BoardState rootState;
-    private int numberOfVisitedStates;
 
     public Graph(Board board) {
         rootState = new BoardState(board);
     }
 
+    /**
+     * A star traversal of the graph
+     * 
+     * @return The final solution or null if it fails
+     */
     public BoardState AStarTraversal() {
         // min priorityQueue for A* traversal
         // top element - state with least heuristics
@@ -29,16 +33,15 @@ public class Graph {
                 var stored = explored.get(currentNode.hashCode());
                 if (stored.getCurrentDistance() < currentNode.getCurrentDistance())
                     continue;
-            } else explored.put(currentNode.hashCode(), currentNode);
-
-            // TODO: remove this in final version, used only in testing
-            numberOfVisitedStates++;
+            } else
+                explored.put(currentNode.hashCode(), currentNode);
 
             // if v is target, then target.totalDistance is lowest in the queue
             // so, we have found the optimal solution.
             if (currentNode.isTarget()) {
                 return currentNode;
             }
+
             var reachableStates = currentNode.getReachableStates(false);
 
             // look at all states reachable from current
@@ -59,9 +62,8 @@ public class Graph {
                         stored.setParent(currentNode);
                         openQueue.add(child);
                     }
-                }
-                else {
-                    child.computeDecentApproximateDistance();
+                } else {
+                    child.computeApproximateDistance();
                     openQueue.add(child);
                     explored.put(child.hashCode(), child);
                 }
@@ -72,6 +74,12 @@ public class Graph {
         // win condition not found
         return null;
     }
+
+    /**
+     * BFS traversal of the graph
+     * 
+     * @return The final solution or null if it fails
+     */
     public BoardState Bfs() {
         var queue = new LinkedList<BoardState>();
         var explored = new HashMap<Integer, BoardState>();
@@ -79,18 +87,18 @@ public class Graph {
         queue.add(rootState);
         explored.put(rootState.hashCode(), rootState);
 
-        while (!queue.isEmpty()){
+        while (!queue.isEmpty()) {
             var currentNode = queue.poll();
-
-            numberOfVisitedStates++;
 
             if (currentNode.isTarget()) {
                 return currentNode;
             }
+
             var reachableStates = currentNode.getReachableStates(false);
 
             reachableStates.forEach(s -> {
-                if(explored.containsKey(s.hashCode())) return;
+                if (explored.containsKey(s.hashCode()))
+                    return;
 
                 explored.put(s.hashCode(), s);
 
@@ -100,8 +108,5 @@ public class Graph {
         }
 
         return null;
-    }
-    public int getNumberOfVisitedStates() {
-        return numberOfVisitedStates;
     }
 }
