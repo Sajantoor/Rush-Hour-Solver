@@ -27,7 +27,7 @@ public class Graph {
             var currentNode = openQueue.poll();
             if (explored.containsKey(currentNode.hashCode())) {
                 var stored = explored.get(currentNode.hashCode());
-                if (stored.getTotalDistance() < currentNode.getTotalDistance())
+                if (stored.getCurrentDistance() < currentNode.getCurrentDistance())
                     continue;
             } else explored.put(currentNode.hashCode(), currentNode);
 
@@ -39,7 +39,7 @@ public class Graph {
             if (currentNode.isTarget()) {
                 return currentNode;
             }
-            var reachableStates = currentNode.getReachableStates();
+            var reachableStates = currentNode.getReachableStates(false);
 
             // look at all states reachable from current
             reachableStates.forEach(child -> {
@@ -50,19 +50,18 @@ public class Graph {
                 if (explored.containsKey(child.hashCode())) {
                     // child is already in closedSet, check if totalDistance can be decreased
                     var stored = explored.get(child.hashCode());
-
-                    if (stored.getTotalDistance() > child.getTotalDistance()) {
+                    if (stored.getCurrentDistance() > child.getCurrentDistance()) {
                         // if yes, send back to queue
-                        if (openQueue.contains(stored)) openQueue.remove(stored);
-
                         stored.setCurrentDistance(child.getCurrentDistance());
-
+                        child.setApproximateDistance(stored.getApproximateDistance());
                         // set parent to current node
                         child.setParent(currentNode);
                         stored.setParent(currentNode);
                         openQueue.add(child);
                     }
-                } else {
+                }
+                else {
+                    child.computeDecentApproximateDistance();
                     openQueue.add(child);
                     explored.put(child.hashCode(), child);
                 }
@@ -88,7 +87,7 @@ public class Graph {
             if (currentNode.isTarget()) {
                 return currentNode;
             }
-            var reachableStates = currentNode.getReachableStates();
+            var reachableStates = currentNode.getReachableStates(false);
 
             reachableStates.forEach(s -> {
                 if(explored.containsKey(s.hashCode())) return;

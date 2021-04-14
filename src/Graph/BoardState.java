@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class BoardState {
     private final Board board;
-    private final int approximateDistance;
+    private int approximateDistance;
     private int currentDistance;
     private int hash;
 
@@ -29,6 +29,14 @@ public class BoardState {
         computeHash();
     }
 
+    public BoardState(ArrayList<Car> carArray, boolean shouldComputeDecentHeuristic){
+
+        Statistics.numberOfBoardStatesCreated++;
+        board = new Board(carArray,shouldComputeDecentHeuristic);
+        approximateDistance = board.getHeuristicDistance();
+        computeHash();
+    }
+
     // getters
     public Board getBoard() {
         return board;
@@ -36,6 +44,14 @@ public class BoardState {
 
     public int getApproximateDistance() {
         return approximateDistance;
+    }
+    public void setApproximateDistance(int approximateDistance){
+        this.board.setHeuristicDistance(approximateDistance);
+        this.approximateDistance = approximateDistance;
+    }
+    public void computeDecentApproximateDistance(){
+        this.board.setHeuristicDistance(this.board.computeHeuristicDistance(true));
+        this.approximateDistance = this.board.getHeuristicDistance();
     }
 
     public int getCurrentDistance() {
@@ -79,73 +95,80 @@ public class BoardState {
         if (carArraySize != other.getBoard().getCars().size())
             return false;
 
-        // go through each car and compare their hashcodes
-        for (int i = 0; i < carArraySize; i++) {
-            if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode())
-                return false;
-        }
+        // // go through each car and compare their hashcodes
+        // for (int i = 0; i < carArraySize; i++) {
+        //     if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode())
+        //         return false;
+        // }
 
         return true;
+    }
+
+    private static ArrayList<Car> carListClone(ArrayList<Car> original) {
+        ArrayList<Car> clone = new ArrayList<Car>();
+
+        for (Car car : original) {
+            clone.add(car);
+        }
+
+        return clone;
     }
 
     /**
      * returns an ArrayList of all board states that can be reached from this one
      */
-    public ArrayList<BoardState> getReachableStates() {
+    public ArrayList<BoardState> getReachableStates(boolean shouldCreateDecentHeuristics) {
         var states = new ArrayList<BoardState>();
         var carList = board.getCars();
         var iterator = carList.iterator();
+        var charBoard = board.getBoard();
 
         while (iterator.hasNext()) {
             var car = iterator.next();
+            var name = car.getName();
+            var size = carList.size();
+            int index = 0;
+
+            // get index of car, linear search
+            for (int i = 0; i < size; i++) {
+                if (carList.get(i).getName() == name) {
+                    index = i;
+                    break;
+                }
+            }
 
             // try to move the car forward and backwards
-            var forwardList = car.getMoveForwardsList();
-            var backwardsList = car.getMoveBackwardsList();
-
-            // all the cars on the board except for the one we are trying to move
-            var restOfTheCarsStream = carList.stream().filter(c -> !c.equals(car));
-            var restOfTheCars = restOfTheCarsStream.collect(Collectors.toList());
+            var forwardList = car.getMoveForwardsList(charBoard);
+            var backwardsList = car.getMoveBackwardsList(charBoard);
 
             // for each forward projection check validaty and create new state
             for (Car forwardProjection : forwardList) {
-                // TODO: a better way instead of comparison with null?
-                if (forwardProjection != null && forwardProjection.isWithinBounds() // if forward projection does not go overboard
-                        && !forwardProjection.isWreckedIntoAnyOf(restOfTheCars)) // and does not hit any of the other cars
-                {
+                if (forwardProjection != null) {
+                    var nextList = carListClone(carList);
                     // generate a new board state with this projection instead of the car
-                    var newCarList = new ArrayList<>(restOfTheCars);
-                    newCarList.add(forwardProjection);
+                    nextList.set(index, forwardProjection);
 
-                    var newState = new BoardState(newCarList);
+                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
                     states.add(newState);
-                } else {
-                   // fixes the imfamous phasing through cars bug, uses the fact they are ordered anyways
-                   break;
-                }
+                } 
             }
 
             for (Car backwardsProjection : backwardsList) {
-                // TODO: a better way instead of comparison with null?
-                if (backwardsProjection != null && backwardsProjection.isWithinBounds() // if backwards projection does not go overboard
-                        && !backwardsProjection.isWreckedIntoAnyOf(restOfTheCars)) // and does not hit any of the other cars
-                {
+                if (backwardsProjection != null) {
                     // generate a new board state with this projection instead of the car
-                    var newCarList = new ArrayList<>(restOfTheCars);
-                    newCarList.add(backwardsProjection);
+                    var nextList = carListClone(carList);
+                    // generate a new board state with this projection instead of the car
+                    nextList.set(index, backwardsProjection);
 
-                    var newState = new BoardState(newCarList);
+                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(this.currentDistance + 1);
                     // add it to the reachable states list
                     states.add(newState);
-                } else {
-                    // fixes the imfamous phasing through cars bug, uses the fact they are ordered anyways
-                    break;
-                }
+                } 
             }
 
         }
