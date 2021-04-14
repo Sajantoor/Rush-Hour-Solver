@@ -139,7 +139,7 @@ public class BoardState {
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(backwardsProjection);
 
-                    var newState = new BoardState(newCarList, false);
+                    var newState = new BoardState(newCarList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(this.currentDistance + 1);
                     // add it to the reachable states list
