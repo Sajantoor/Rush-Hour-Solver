@@ -87,13 +87,23 @@ public class BoardState {
         if (carArraySize != other.getBoard().getCars().size())
             return false;
 
-        // go through each car and compare their hashcodes
-        for (int i = 0; i < carArraySize; i++) {
-            if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode())
-                return false;
-        }
+        // // go through each car and compare their hashcodes
+        // for (int i = 0; i < carArraySize; i++) {
+        //     if (this.getBoard().getCars().get(i).hashCode() != other.getBoard().getCars().get(i).hashCode())
+        //         return false;
+        // }
 
         return true;
+    }
+
+    private static ArrayList<Car> carListClone(ArrayList<Car> original) {
+        ArrayList<Car> clone = new ArrayList<Car>();
+
+        for (Car car : original) {
+            clone.add(car);
+        }
+
+        return clone;
     }
 
     /**
@@ -107,24 +117,30 @@ public class BoardState {
 
         while (iterator.hasNext()) {
             var car = iterator.next();
+            var name = car.getName();
+            var size = carList.size();
+            int index = 0;
+
+            // get index of car, linear search
+            for (int i = 0; i < size; i++) {
+                if (carList.get(i).getName() == name) {
+                    index = i;
+                    break;
+                }
+            }
 
             // try to move the car forward and backwards
             var forwardList = car.getMoveForwardsList(charBoard);
             var backwardsList = car.getMoveBackwardsList(charBoard);
 
-            // all the cars on the board except for the one we are trying to move
-            var restOfTheCarsStream = carList.stream().filter(c -> !c.equals(car));
-            var restOfTheCars = restOfTheCarsStream.collect(Collectors.toList());
-
             // for each forward projection check validaty and create new state
             for (Car forwardProjection : forwardList) {
-                // TODO: a better way instead of comparison with null?
                 if (forwardProjection != null) {
+                    var nextList = carListClone(carList);
                     // generate a new board state with this projection instead of the car
-                    var newCarList = new ArrayList<>(restOfTheCars);
-                    newCarList.add(forwardProjection);
+                    nextList.set(index, forwardProjection);
 
-                    var newState = new BoardState(newCarList, shouldCreateDecentHeuristics);
+                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
@@ -133,13 +149,13 @@ public class BoardState {
             }
 
             for (Car backwardsProjection : backwardsList) {
-                // TODO: a better way instead of comparison with null?
                 if (backwardsProjection != null) {
                     // generate a new board state with this projection instead of the car
-                    var newCarList = new ArrayList<>(restOfTheCars);
-                    newCarList.add(backwardsProjection);
+                    var nextList = carListClone(carList);
+                    // generate a new board state with this projection instead of the car
+                    nextList.set(index, backwardsProjection);
 
-                    var newState = new BoardState(newCarList, shouldCreateDecentHeuristics);
+                    var newState = new BoardState(nextList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(this.currentDistance + 1);
                     // add it to the reachable states list

@@ -213,7 +213,7 @@ public class BoardTest {
             var st = new BoardState(board);
             long start = System.currentTimeMillis();
             for (int i = 0; i < NUMBER_OF_TESTS; ++i) {
-                var t = st.getReachableStates();
+                var t = st.getReachableStates(false);
             }
             long end = System.currentTimeMillis();
 

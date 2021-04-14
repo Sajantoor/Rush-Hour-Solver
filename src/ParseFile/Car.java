@@ -63,7 +63,7 @@ public class Car {
     }
 
     /**
-     * @param end: Coordinate of the last instance of the car as class Point.
+     * @param end Coordinate of the last instance of the car as class Point.
      */
     public void setEnd(Point end) {
         // re calculate the direction and calculate size
@@ -112,6 +112,10 @@ public class Car {
         return this.isHorizontal;
     }
 
+    public int getSize() {
+        return size;
+    }
+
     /*
      * ============== Helper functions for constructing =======================
      */
@@ -141,10 +145,6 @@ public class Car {
      * @param end Cooridnates of the last instance of the car of class Point
      */
     private void calcDirection(Point end) {
-        if (this.coords == null && this.size != 0) {
-            return;
-        }
-
         if (this.coords.getX() != end.getX()) {
             this.isHorizontal = true;
         } else {
@@ -208,105 +208,6 @@ public class Car {
     /*
      * ================== Graph projections ==========================
      */
-
-    /**
-     * @return Returns true if the two cars have cells in common
-     */
-    public boolean isWreckedInto(Car another) {
-        var startX = getStart().getX();
-        var startY = getStart().getY();
-        var endX = getEnd().getX();
-        var endY = getEnd().getY();
-        var anotherStartX = another.getStart().getX();
-        var anotherStartY = another.getStart().getY();
-        var anotherEndX = another.getEnd().getX();
-        var anotherEndY = another.getEnd().getY();
-
-        if (isHorizontal) {
-            if (another.isHorizontal) {
-                // both cars are horizontal and are on different rows
-                // wreck is impossible
-                if (startY != anotherStartY)
-                    return false;
-
-                // both cars are on the same row
-                // there is a wreck if their ends are in the same column
-                if (startX == anotherEndX || endX == anotherStartX)
-                    return true;
-                else
-                    return false;
-            } else {
-                if (startY >= anotherStartY && startY <= anotherEndY) {
-                    if (startX <= anotherStartX && endX >= anotherStartX) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        } else {
-            if (!another.isHorizontal) {
-                // both cars are horizontal and are on different rows
-                // wreck is impossible
-                if (startX != anotherStartX)
-                    return false;
-
-                // both cars are on the same row
-                // there is a wreck if their ends are in the same column
-                if (startY == anotherEndY || endY == anotherStartY)
-                    return true;
-                else
-                    return false;
-            } else {
-                if (startX >= anotherStartX && startX <= anotherEndX) {
-                    if (startY <= anotherStartY && endY >= anotherStartY) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-    }
-
-    /**
-     * @param cars - list of cars to check
-     * @return Returns true if the given car is wrecked into any of the cars from
-     *         the list
-     */
-    public boolean isWreckedIntoAnyOf(List<Car> cars) {
-        // for every car check whether there is a wreck
-        boolean isWreckFound = cars.stream().anyMatch(c -> this.isWreckedInto(c));
-        return isWreckFound;
-    }
-
-    /**
-     * Looks for the potential car this one is wrecked into
-     * @return Returns {@link Optional} of a Car.
-     */
-    public Optional<Car> getPotentialWreck(List<Car> cars){
-        return cars.stream()
-                .filter(c -> !this.equals(c) && this.isWreckedInto(c))
-                .findFirst();
-    }
-
-    /**
-     * Checks whether the car's coordinates do not go outside of the board
-     * 
-     * @return true if the car coordinates are legal, false otherwise
-     */
-    public boolean isWithinBounds() {
-        var start = getStart();
-        var end = getEnd();
-        // overboard on the x-coordinate
-        if (start.getX() < 0 || end.getX() >= Constants.SIZE)
-            return false;
-        // overboard on the y-coordinate
-        if (start.getY() < 0 || end.getY() >= Constants.SIZE)
-            return false;
-
-        return true;
-    }
 
     /**
      * Creates a projection of this car, as if it moved forward
@@ -526,27 +427,6 @@ public class Car {
         return projectionList;
     }
 
-    public boolean nameEquals(Car other){
-        return other.getName() == getName();
-    }
-
-    // move to board.java later
-    public static char[][] boardClone(char[][] board) {
-        char[][] clone = new char[Constants.SIZE][Constants.SIZE];
-        
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                clone[i][j] = board[i][j];
-            }   
-        }
-
-        return clone;
-    }
-
-    public int getSize(){
-        return size;
-    }
-
     // full slide blocking cars
     public ArrayList<Car> getBlockingForwardCarList(Car[][] board){
         var end = getEnd();
@@ -628,6 +508,7 @@ public class Car {
             else return Optional.empty();
         }
     }
+
     public ArrayList<Car> getOneStepBlockingCars(Car[][] board){
         var blockingCars = new ArrayList<Car>();
 
@@ -662,6 +543,7 @@ public class Car {
 
         return blockingCars;
     }
+
     public ArrayList<Car> getBlockingNStepsBackwardsCarList(Car[][] board, int n){
         var x = coords.getX();
         var y = coords.getY();

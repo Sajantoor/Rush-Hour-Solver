@@ -147,6 +147,18 @@ public class Board {
         this.carArray = carArray;
     }
 
+    public static char[][] boardClone(char[][] board) {
+        char[][] clone = new char[Constants.SIZE][Constants.SIZE];
+        
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board.length; j++) {
+                clone[i][j] = board[i][j];
+            }   
+        }
+
+        return clone;
+    }
+
     // computes the heuristic distance needed for a player car to reach exit
     // currently adds 1 to heuristic whenever there's car on the way
     // TODO: do something smarter than this, i.e. add number of moves needed to get the car out of the way
@@ -199,15 +211,12 @@ public class Board {
      * @return approximation on the amount of moves to clear the way
      */
     private int getCarsBlockedRecursiveHeuristic(Stream<Car> carsInTheWay){
-        var cars = getCars();
-
         // phaseThroughMoves - number of moves to clear the way, if blocking cars were free to move
         // blockingCars - number of cars blocking the way to exit
         var wrapper = new Object(){int blockingCars = 0;};
         // represents each car by its letter
         boolean[] lookedAt = new boolean[26];
 
-        var board = getBoard();
         var carBoard = getCarBoard();
 
         var blockingCarsQueue = new LinkedList<Car>();
@@ -281,11 +290,13 @@ public class Board {
 
         return wrapper.blockingCars;
     }
+
     private int getHalfDecentHeuristics(Stream<Car> carsInTheWay){
         var wrapper = new Object(){int count;};
         carsInTheWay.forEach(c -> {wrapper.count++;});
         return wrapper.count;
     }
+
     private int getSimplestHeuristic(){
         return 0;
     }
@@ -316,6 +327,7 @@ public class Board {
             System.out.println("--------------------");
         }
     }
+    
     // for debugging
     public char[][] getBoard() {
         char[][] board = new char[Constants.SIZE][Constants.SIZE];
@@ -340,6 +352,7 @@ public class Board {
 
         return board;
     }
+
     // this is either stupid or genius I am not sure yet
     // with this we can get wreck car by board[i][j]
     public Car[][] getCarBoard() {
@@ -429,17 +442,5 @@ public class Board {
 
         // they are the same
         return null;
-    }
-
-    public static char[][] boardClone(char[][] board) {
-        char[][] clone = new char[Constants.SIZE][Constants.SIZE];
-        
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board.length; j++) {
-                clone[i][j] = board[i][j];
-            }   
-        }
-
-        return clone;
     }
 }
