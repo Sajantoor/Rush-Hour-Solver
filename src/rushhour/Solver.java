@@ -1,7 +1,10 @@
+package rushhour;
+
 import Graph.*;
 import ParseFile.*;
+
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 
 public class Solver {
     /**
@@ -11,27 +14,32 @@ public class Solver {
      * @throws Exception Throws an exception if not enough arguments, invalid
      *                   arguments or unable to open or write to file.
      */
-    public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            throw new IllegalArgumentException("Expected 2 arguments: " + args.length + " provided.");
+    public static void solveFromFile(String input, String output) throws FileNotFoundException {
+        if (input == null || output == null) {
+            throw new FileNotFoundException("Input and output strings cannot be null.");
         }
 
         FileWriter file;
 
         // validate if it's a file that can be opened
         try {
-            file = new FileWriter(args[1]);
+            file = new FileWriter(output);
         } catch (Exception e) {
-            throw new IOException("Output file could not be created: " + e);
+            throw new FileNotFoundException("Output file could not be created: " + e);
         }
 
         // solve the board
         // board validates the filename of arg[0]
-        var board = new Board(args[0]);
+        var board = new Board(input);
         var graph = new Graph(board);
         var solution = graph.AStarTraversal();
         outputSolution(solution, file);
-        file.close();
+
+        try {
+            file.close();
+        } catch (Exception e) {
+            throw new FileNotFoundException("Could not close file correctly.");
+        }
     }
 
     /**
@@ -45,7 +53,7 @@ public class Solver {
      * @param file     Filewriter that's a file to write to
      * @throws Exception Throws an exception if unable to write to the file
      */
-    public static void outputSolution(BoardState solution, FileWriter file) throws Exception {
+    public static void outputSolution(BoardState solution, FileWriter file) throws FileNotFoundException {
         BoardState state = solution;
         String output = "";
 
@@ -65,7 +73,7 @@ public class Solver {
         try {
             file.write(output);
         } catch (Exception e) {
-            throw new IOException("File could not be written to: " + e);
+            throw new FileNotFoundException("File could not be written to: " + e);
         }
     }
 }

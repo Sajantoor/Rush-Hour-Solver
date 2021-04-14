@@ -20,7 +20,7 @@ public class Board {
      * @throws Exception Throws an exception if the filename is null or file is not
      *                   found
      */
-    public Board(String fileName) throws Exception {
+    public Board(String fileName) throws FileNotFoundException {
         if (fileName == null) {
             throw new FileNotFoundException("File is null in the file constructor.");
         }

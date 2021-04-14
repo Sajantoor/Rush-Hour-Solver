@@ -133,9 +133,6 @@ public class BoardTest {
             System.out.println("=========================================================");
 
             return true;
-        } catch (TimeoutException e) {
-            System.out.println("Test failed. Time out");
-
         } catch (Exception e) {
             System.out.println("Failed." + e);
             System.out.println("Stack trace: ");
