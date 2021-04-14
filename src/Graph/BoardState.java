@@ -29,6 +29,14 @@ public class BoardState {
         computeHash();
     }
 
+    public BoardState(ArrayList<Car> carArray, boolean shouldComputeDecentHeuristic){
+
+        Statistics.numberOfBoardStatesCreated++;
+        board = new Board(carArray,shouldComputeDecentHeuristic);
+        approximateDistance = board.getHeuristicDistance();
+        computeHash();
+    }
+
     // getters
     public Board getBoard() {
         return board;
@@ -116,7 +124,7 @@ public class BoardState {
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(forwardProjection);
 
-                    var newState = new BoardState(newCarList);
+                    var newState = new BoardState(newCarList, true);
                     newState.setParent(this);
                     newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
@@ -131,7 +139,7 @@ public class BoardState {
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(backwardsProjection);
 
-                    var newState = new BoardState(newCarList);
+                    var newState = new BoardState(newCarList, false);
                     newState.setParent(this);
                     newState.setCurrentDistance(this.currentDistance + 1);
                     // add it to the reachable states list
