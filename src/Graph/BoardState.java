@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class BoardState {
     private final Board board;
-    private final int approximateDistance;
+    private int approximateDistance;
     private int currentDistance;
     private int hash;
 
@@ -44,6 +44,14 @@ public class BoardState {
 
     public int getApproximateDistance() {
         return approximateDistance;
+    }
+    public void setApproximateDistance(int approximateDistance){
+        this.board.setHeuristicDistance(approximateDistance);
+        this.approximateDistance = approximateDistance;
+    }
+    public void computeDecentApproximateDistance(){
+        this.board.setHeuristicDistance(this.board.computeHeuristicDistance(true));
+        this.approximateDistance = this.board.getHeuristicDistance();
     }
 
     public int getCurrentDistance() {
