@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 // class with methods to parse a board. 
 public class Board {
     private ArrayList<Car> carArray; // array of car objects
-    private final int heuristicDistance;
+    private int heuristicDistance;
     /**
      * Constructor of the board, used to parse a board file.
      * 
@@ -162,7 +162,7 @@ public class Board {
     // computes the heuristic distance needed for a player car to reach exit
     // currently adds 1 to heuristic whenever there's car on the way
     // TODO: do something smarter than this, i.e. add number of moves needed to get the car out of the way
-    private int computeHeuristicDistance(boolean shouldComputeDecentHeuristics) {
+    public int computeHeuristicDistance(boolean shouldComputeDecentHeuristics) {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
@@ -204,6 +204,12 @@ public class Board {
      */
     public int getHeuristicDistance(){
         return heuristicDistance;
+    }
+    /**
+     * change the heuristic approximation for this board
+     */
+    public void setHeuristicDistance(int heuristicDistance){
+        this.heuristicDistance = heuristicDistance;
     }
     /**
      *
