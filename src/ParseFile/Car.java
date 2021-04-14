@@ -1,9 +1,6 @@
 package ParseFile;
 
 import Utility.Constants;
-import Utility.Statistics;
-
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -11,7 +8,7 @@ public class Car {
     private Point coords; // x and y coords, first instance of car => this will be the top most, left most
                           // instance
     private byte size; // size of the car
-    private byte name; // values A - Z (26 letters) 
+    private byte name; // values A - Z (26 letters)
     private boolean isHorizontal; // the direction the car can move
 
     /*
@@ -41,7 +38,7 @@ public class Car {
      * @param start The starting (first instance) coordinates of the car of as the
      *              class Point
      * @param end   The last (last instance) coordinates of the car of as the class
-     *              Point
+     *              Point Assumes all are not null.
      */
     public Car(char name, Point start, Point end) {
         this.name = (byte) (name - Constants.ASCII_CAPITAL);
@@ -112,6 +109,10 @@ public class Car {
         return this.isHorizontal;
     }
 
+    /**
+     * 
+     * @return the size of the car
+     */
     public int getSize() {
         return size;
     }
@@ -186,8 +187,8 @@ public class Car {
         if (this.getCoordsHashcode() != o.getCoordsHashcode())
             return false;
 
-        return isHorizontal == o.isHorizontal() && coords.equals(o.coords)
-                && this.size == o.size && this.name == o.name;
+        return isHorizontal == o.isHorizontal() && coords.equals(o.coords) && this.size == o.size
+                && this.name == o.name;
     }
 
     @Override
@@ -212,64 +213,66 @@ public class Car {
     /**
      * Creates a projection of this car, as if it moved forward
      * 
-     * @param board char representation of the baord, not to be changed.
-     * @param createNew Flag where a board copy is created and returned. 
-     * Should be false if calling this method.
+     * @param board     char representation of the baord, not to be changed.
+     * @param createNew Flag where a board copy is created and returned. Should be
+     *                  false if calling this method.
      * @return null if going overboard, a new car otherwise
      *
      */
     public CarProjection getMoveForwardProjection(char[][] board, boolean createNew) {
-        char[][] boardCopy; 
-        
+        char[][] boardCopy;
+
         if (createNew) { // if we are creating a new board, and modifying, create clone
             boardCopy = Board.boardClone(board);
         } else {
             boardCopy = board; // else just use the old board
         }
-        
+
         var copy = new Car(this);
         var x = this.getStart().getX();
-        var y = this.getStart().getY(); 
+        var y = this.getStart().getY();
 
         if (isHorizontal) {
             // translate by one
             x += 1;
-            var x_end = this.getEnd().getX() + 1; 
+            var x_end = this.getEnd().getX() + 1;
 
             // out of bounds error.
             if (x_end >= Constants.SIZE)
                 return null;
-            
-            // check if x_end doesn't hit another car, moving forward therefore end will be hitting the car first
+
+            // check if x_end doesn't hit another car, moving forward therefore end will be
+            // hitting the car first
             if (boardCopy[y][x_end] != Constants.EMPTY_FIELD) {
                 return null;
             }
 
             copy.getStart().setX(x);
             // update board
-            
+
             if (createNew) {
-                boardCopy[y][copy.getEnd().getX()] = this.getName(); // add instance at end 
+                boardCopy[y][copy.getEnd().getX()] = this.getName(); // add instance at end
                 boardCopy[y][x - 1] = Constants.EMPTY_FIELD; // remove the starting car instance
             }
         } else {
             // translate by one
             y += 1;
             var y_end = this.getEnd().getY() + 1;
-            
+
             // out of bounds error.
             if (y_end >= Constants.SIZE)
                 return null;
-            
-            // check if y_end doesn't hit another car, moving down therefore y_end would be hit first.
+
+            // check if y_end doesn't hit another car, moving down therefore y_end would be
+            // hit first.
             if (boardCopy[y_end][x] != Constants.EMPTY_FIELD) {
                 return null;
             }
-            
+
             copy.getStart().setY(y);
             // update board
             if (createNew) {
-                boardCopy[copy.getEnd().getY()][x] = this.getName(); // add instance at end 
+                boardCopy[copy.getEnd().getY()][x] = this.getName(); // add instance at end
                 boardCopy[y - 1][x] = Constants.EMPTY_FIELD; // remove the starting car instance
             }
         }
@@ -284,9 +287,9 @@ public class Car {
     /**
      * Creates a projection of this car, as if it moved backwards
      * 
-     * @param board char representation of the baord, not to be changed.
-     * @param createNew Flag where a board copy is created and returned. 
-     * Should be false if calling this method.
+     * @param board     char representation of the baord, not to be changed.
+     * @param createNew Flag where a board copy is created and returned. Should be
+     *                  false if calling this method.
      * @return null if going overboard, a new car otherwise
      */
     public CarProjection getMoveBackwardsProjection(char[][] board, boolean createNew) {
@@ -304,10 +307,10 @@ public class Car {
         if (isHorizontal) {
             x -= 1; // translate by 1
 
-            // out of bounds error 
+            // out of bounds error
             if (x < 0)
                 return null;
-            
+
             // if there is an accident
             if (boardCopy[y][x] != Constants.EMPTY_FIELD) {
                 return null;
@@ -324,7 +327,7 @@ public class Car {
 
             if (y < 0)
                 return null;
-            
+
             if (boardCopy[y][x] != Constants.EMPTY_FIELD) {
                 return null;
             }
@@ -346,9 +349,10 @@ public class Car {
     }
 
     /**
-     * Wrapper around {@link #getMoveForwardProjection} and {@link #getMoveBackwardsProjection(char[][] board, boolean)}.
-     * Generates a list of one move projections for this car.
-     * Projections are guaranteed to be within the board
+     * Wrapper around {@link #getMoveForwardProjection} and
+     * {@link #getMoveBackwardsProjection(char[][] board, boolean)}. Generates a
+     * list of one move projections for this car. Projections are guaranteed to be
+     * within the board
      *
      * @param board char representation of the baord, not to be changed.
      * @return list of projections, all within the board bounds, none are null
@@ -358,7 +362,7 @@ public class Car {
 
         var forwardProjection = getMoveForwardProjection(board, false);
 
-        if (forwardProjection != null) 
+        if (forwardProjection != null)
             projections.add(forwardProjection.getCar());
 
         var backwardsProjection = getMoveBackwardsProjection(board, false);
@@ -370,9 +374,9 @@ public class Car {
     }
 
     /**
-     * Extention of {@link #getMoveForwardProjection(char[][], boolean)}, instead gets all forward
-     * projections and adds them to a list, does this until getMoveForwardProjection
-     * returns null.
+     * Extention of {@link #getMoveForwardProjection(char[][], boolean)}, instead
+     * gets all forward projections and adds them to a list, does this until
+     * getMoveForwardProjection returns null.
      * 
      * @param board char representation of the baord, not to be changed.
      * @return List of cars, containing forward projections, none are NULL.
@@ -386,7 +390,7 @@ public class Car {
         while (projection != null) {
             CarProjection carProjection = projection.getMoveForwardProjection(boardCopy, true);
             if (carProjection != null) {
-                // boardCopy = carProjection.getBoard(); // get next board 
+                // boardCopy = carProjection.getBoard(); // get next board
                 projection = carProjection.getCar(); // get next car
                 projectionList.add(projection); // add to list
             } else {
@@ -398,8 +402,8 @@ public class Car {
     }
 
     /**
-     * Extention of {@link #getMoveBackwardsProjection(char[][], boolean)}, instead gets all
-     * backwards projections and adds them to a list, does this until
+     * Extention of {@link #getMoveBackwardsProjection(char[][], boolean)}, instead
+     * gets all backwards projections and adds them to a list, does this until
      * getMoveBackwardsProjection returns null.
      * 
      * @param board char representation of the baord, not to be changed.
@@ -414,7 +418,7 @@ public class Car {
         // create forward projections until hit out of bounds, then add to list!
         while (projection != null) {
             CarProjection carProjection = projection.getMoveBackwardsProjection(boardCopy, true);
-            
+
             if (carProjection != null) {
                 // boardCopy = carProjection.getBoard(); // get the next board
                 projection = carProjection.getCar(); // get the next car
@@ -427,138 +431,190 @@ public class Car {
         return projectionList;
     }
 
-    // full slide blocking cars
-    public ArrayList<Car> getBlockingForwardCarList(Car[][] board){
+    /**
+     * 
+     * @param board char representation of the board
+     * @return list of cars that are blocking the car this method is called upon (in
+     *         forward direction)
+     */
+    public ArrayList<Car> getBlockingForwardCarList(Car[][] board) {
         var end = getEnd();
         var x = end.getX();
         var y = end.getY();
 
         var blockingCars = new ArrayList<Car>();
-        if(isHorizontal){
-            for(int i = x + 1; i < Constants.SIZE; ++i){
-                if(board[y][i] != null) blockingCars.add(board[y][i]);
+        if (isHorizontal) {
+            for (int i = x + 1; i < Constants.SIZE; ++i) {
+                if (board[y][i] != null)
+                    blockingCars.add(board[y][i]);
             }
-        }
-        else{
-            for(int i = y + 1; i < Constants.SIZE; ++i){
-                if(board[i][x] != null) blockingCars.add(board[i][x]);
-            }
-        }
-
-        return blockingCars;
-    }
-    public ArrayList<Car> getBlockingBackwardsCarList(Car[][] board){
-        var x = coords.getX();
-        var y = coords.getY();
-
-        var blockingCars = new ArrayList<Car>();
-        if(isHorizontal){
-            for(int i = x; i >= 0; i--){
-                if(board[y][i] != null) blockingCars.add(board[y][i]);
-            }
-        }
-        else{
-            for(int i = y; i >= 0; i--){
-                if(board[i][x] != null) blockingCars.add(board[i][x]);
+        } else {
+            for (int i = y + 1; i < Constants.SIZE; ++i) {
+                if (board[i][x] != null)
+                    blockingCars.add(board[i][x]);
             }
         }
 
         return blockingCars;
     }
 
-    // 1 step blocking cars
-    public Optional<Car> getBlockingForwardCar(Car[][] board){
+    /**
+     * 
+     * @param board char representation of the board
+     * @return list of cars that are blocking the car this method is called upon (in
+     *         backwards direction)
+     */
+    public ArrayList<Car> getBlockingBackwardsCarList(Car[][] board) {
+        var x = coords.getX();
+        var y = coords.getY();
+
+        var blockingCars = new ArrayList<Car>();
+        if (isHorizontal) {
+            for (int i = x; i >= 0; i--) {
+                if (board[y][i] != null)
+                    blockingCars.add(board[y][i]);
+            }
+        } else {
+            for (int i = y; i >= 0; i--) {
+                if (board[i][x] != null)
+                    blockingCars.add(board[i][x]);
+            }
+        }
+
+        return blockingCars;
+    }
+
+    /**
+     * 
+     * @param board char representation of the board
+     * @return List of cars that are blocking the car this method is called upon, in
+     *         one step. (forward)
+     */
+    public Optional<Car> getBlockingForwardCar(Car[][] board) {
         var end = getEnd();
         var x = end.getX();
         var y = end.getY();
 
-        if(isHorizontal){
-            if(x == Constants.SIZE - 1) return Optional.empty();
+        if (isHorizontal) {
+            if (x == Constants.SIZE - 1)
+                return Optional.empty();
 
+            if (board[y][x + 1] != null)
+                return Optional.of(board[y][x + 1]);
+            else
+                return Optional.empty();
+        } else {
 
-            if(board[y][x+1] != null)
-                return Optional.of(board[y][x+1]);
-            else return Optional.empty();
-        }
-        else{
+            if (y == Constants.SIZE - 1)
+                return Optional.empty();
 
-            if(y == Constants.SIZE - 1) return Optional.empty();
-
-            if(board[y+1][x] != null)
-                return Optional.of(board[y-1][x]);
-            else return Optional.empty();
+            if (board[y + 1][x] != null)
+                return Optional.of(board[y - 1][x]);
+            else
+                return Optional.empty();
         }
     }
-    public Optional<Car> getBlockingBackwardsCar(Car[][] board){
+
+    /**
+     * 
+     * @param board char representation of the board
+     * @return List of cars that are blocking the car this method is called upon, in
+     *         one step. (backwards)
+     */
+    public Optional<Car> getBlockingBackwardsCar(Car[][] board) {
         var x = coords.getX();
         var y = coords.getY();
 
-        if(isHorizontal){
-            if(x == 0) return Optional.empty();
-            if(board[y][x-1] != null)
-                return Optional.of(board[y][x-1]);
-            else return Optional.empty();
-        }
-        else{
+        if (isHorizontal) {
+            if (x == 0)
+                return Optional.empty();
+            if (board[y][x - 1] != null)
+                return Optional.of(board[y][x - 1]);
+            else
+                return Optional.empty();
+        } else {
 
-            if(y == 0) return Optional.empty();
+            if (y == 0)
+                return Optional.empty();
 
-            if(board[y-1][x] != null)
-                return Optional.of(board[y-1][x]);
-            else return Optional.empty();
+            if (board[y - 1][x] != null)
+                return Optional.of(board[y - 1][x]);
+            else
+                return Optional.empty();
         }
     }
 
-    public ArrayList<Car> getOneStepBlockingCars(Car[][] board){
+    /**
+     * 
+     * @param board char representation of the board
+     * @return List of cars all cars that are blocking the car this method is called
+     *         upon, in one step. (Forward and backwards)
+     */
+    public ArrayList<Car> getOneStepBlockingCars(Car[][] board) {
         var blockingCars = new ArrayList<Car>();
 
         var blockingForwardCar = getBlockingForwardCar(board);
         var blockingBackwardsCar = getBlockingBackwardsCar(board);
 
-        if(blockingForwardCar.isPresent())blockingCars.add(blockingForwardCar.get());
-        if(blockingBackwardsCar.isPresent())blockingCars.add(blockingBackwardsCar.get());
+        if (blockingForwardCar.isPresent())
+            blockingCars.add(blockingForwardCar.get());
+        if (blockingBackwardsCar.isPresent())
+            blockingCars.add(blockingBackwardsCar.get());
 
-        return  blockingCars;
+        return blockingCars;
     }
 
-    // n steps blocking cars
-    public ArrayList<Car> getBlockingNStepsForwardCarList(Car[][] board, int n){
+    /**
+     * 
+     * @param board char representation of the board
+     * @return List of cars all cars that are blocking the car this method is called
+     *         upon, in n steps. (forward)
+     */
+    public ArrayList<Car> getBlockingNStepsForwardCarList(Car[][] board, int n) {
         var end = getEnd();
         var x = end.getX();
         var y = end.getY();
 
         var blockingCars = new ArrayList<Car>();
-        if(isHorizontal){
+        if (isHorizontal) {
             int bound = Math.min(Constants.SIZE, x + n);
-            for(int i = x + 1; i < bound; ++i){
-                if(board[y][i] != null) blockingCars.add(board[y][i]);
+            for (int i = x + 1; i < bound; ++i) {
+                if (board[y][i] != null)
+                    blockingCars.add(board[y][i]);
             }
-        }
-        else{
+        } else {
             int bound = Math.min(Constants.SIZE, y + n);
-            for(int i = y + 1; i < bound; ++i){
-                if(board[i][x] != null) blockingCars.add(board[i][x]);
+            for (int i = y + 1; i < bound; ++i) {
+                if (board[i][x] != null)
+                    blockingCars.add(board[i][x]);
             }
         }
 
         return blockingCars;
     }
 
-    public ArrayList<Car> getBlockingNStepsBackwardsCarList(Car[][] board, int n){
+    /**
+     * 
+     * @param board char representation of the board
+     * @return List of cars all cars that are blocking the car this method is called
+     *         upon, in n steps. (backwards)
+     */
+    public ArrayList<Car> getBlockingNStepsBackwardsCarList(Car[][] board, int n) {
         var x = coords.getX();
         var y = coords.getY();
 
         var blockingCars = new ArrayList<Car>();
-        if (isHorizontal){
+        if (isHorizontal) {
             int bound = Math.max(0, x - n + 1);
-            for(int i = x; i >= bound; i--){
-                if(board[y][i] != null) blockingCars.add(board[y][i]);
+            for (int i = x; i >= bound; i--) {
+                if (board[y][i] != null)
+                    blockingCars.add(board[y][i]);
             }
-        }
-        else{
+        } else {
             int bound = Math.max(0, y - n + 1);
-            for(int i = y; i >= bound; i--){
-                if(board[i][x] != null) blockingCars.add(board[i][x]);
+            for (int i = y; i >= bound; i--) {
+                if (board[i][x] != null)
+                    blockingCars.add(board[i][x]);
             }
         }
 
