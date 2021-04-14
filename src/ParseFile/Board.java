@@ -181,7 +181,9 @@ public class Board {
                     return isOnTheWay;
                 });
 
-        return heuristic + (shouldComputeDecentHeuristics? getHalfDecentHeuristics(carsInTheWay): getSimplestHeuristic());
+        return heuristic + (shouldComputeDecentHeuristics?
+                getCarsBlockedRecursiveHeuristic(carsInTheWay) :
+                getSimplestHeuristic());
     }
 
     /**
@@ -248,14 +250,14 @@ public class Board {
             // checking if the cars blocking main way are blocked:
             wrapper.blockingCars += blockingCars.size();
 
-//            blockingCars.forEach(blockingCar -> {
-//                // blocked, so will increase heuristic
-//                // for bfs
-//                if(!lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL]) {
-//                    blockingCarsQueue.add(blockingCar);
-//                    lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL] = true;
-//                }
-//            });
+            blockingCars.forEach(blockingCar -> {
+                // blocked, so will increase heuristic
+                // for bfs
+                if(!lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL]) {
+                    blockingCarsQueue.add(blockingCar);
+                    lookedAt[blockingCar.getName() - Constants.ASCII_CAPITAL] = true;
+                }
+            });
 
             wrapper.blockingCars++;
         });

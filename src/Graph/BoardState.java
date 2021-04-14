@@ -99,7 +99,7 @@ public class BoardState {
     /**
      * returns an ArrayList of all board states that can be reached from this one
      */
-    public ArrayList<BoardState> getReachableStates() {
+    public ArrayList<BoardState> getReachableStates(boolean shouldCreateDecentHeuristics) {
         var states = new ArrayList<BoardState>();
         var carList = board.getCars();
         var iterator = carList.iterator();
@@ -124,7 +124,7 @@ public class BoardState {
                     var newCarList = new ArrayList<>(restOfTheCars);
                     newCarList.add(forwardProjection);
 
-                    var newState = new BoardState(newCarList, true);
+                    var newState = new BoardState(newCarList, shouldCreateDecentHeuristics);
                     newState.setParent(this);
                     newState.setCurrentDistance(currentDistance + 1);
                     // add it to the reachable states list
