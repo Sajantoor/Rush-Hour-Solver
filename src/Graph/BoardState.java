@@ -33,6 +33,17 @@ public class BoardState {
         computeHash();
     }
 
+    /**
+     * 
+     * @param carArray Creates a new board state from a car array
+     * @param shouldComputeDecentHeuristic flag to set if it should compute decent heurstic or not
+     */
+    public BoardState(ArrayList<Car> carArray, boolean shouldComputeDecentHeuristic){
+        board = new Board(carArray, shouldComputeDecentHeuristic);
+        approximateDistance = board.getHeuristicDistance();
+        computeHash();
+    }
+
     // getters
     public Board getBoard() {
         return board;
@@ -48,7 +59,7 @@ public class BoardState {
     }
 
     public void computeApproximateDistance() {
-        this.board.setHeuristicDistance(this.board.computeHeuristicDistance());
+        this.board.setHeuristicDistance(this.board.computeHeuristicDistance(true));
         this.approximateDistance = this.board.getHeuristicDistance();
     }
 

@@ -50,12 +50,17 @@ public class Board {
         }
 
         createObjectsFromBoard(board);
-        heuristicDistance = computeHeuristicDistance();
+        heuristicDistance = computeHeuristicDistance(true);
     }
 
     public Board(ArrayList<Car> carArray) {
         this.carArray = carArray;
-        heuristicDistance = computeHeuristicDistance();
+        heuristicDistance = computeHeuristicDistance(true);
+    }
+
+    public Board(ArrayList<Car> carArray, boolean shouldComputeDecentHeuristics) {
+        this.carArray = carArray;
+        heuristicDistance = computeHeuristicDistance(shouldComputeDecentHeuristics);
     }
 
     /**
@@ -307,7 +312,7 @@ public class Board {
      * @return computes the heuristic distance needed for a player car to reach exit
      *         and the getCarsBlockedRecursiveHeuristic()
      */
-    public int computeHeuristicDistance() {
+    public int computeHeuristicDistance(boolean shouldComputeDecentHeuristics) {
         // get the playerCar from the board
         var playerCar = getCars().stream() // some java magic
                 .filter(c -> c.getName() == 'X') // player car's name is 'X'
@@ -339,7 +344,12 @@ public class Board {
                     return isOnTheWay;
                 });
 
-        return heuristic + getCarsBlockedRecursiveHeuristic(carsInTheWay);
+        return heuristic + (shouldComputeDecentHeuristics ? getCarsBlockedRecursiveHeuristic(carsInTheWay)
+                : getSimplestHeuristic());
+    }
+
+    private int getSimplestHeuristic() {
+        return 0;
     }
 
     /**
