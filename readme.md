@@ -160,7 +160,7 @@ In terms of memory the `Car` object doesn't use much, only using 4 bytes for eac
 
 One of the major changes in the parsing sections was how information was stored. It started pretty basic with using `int`s to store, x and y coordinates, size, and `char` for name. We quickly realized this would be inefficient for the memory and decided to switch to something else. Based of a stackoverflow post, `boolean` arrays were decided upon. Instead of storing a range of small values in an `int`, we stored them by converting to binary to decimal and converting back when needed. This made it so `Car` only used memory of 15 bits total. However, converting from decimal to binary and binary to decimal was done so often, with at least hundreds of thousands of function calls. Even with the most efficent algorithms to do so, it was inefficent and wasted quite a bit of time. So it was decided on to use the `byte` data type instead, resulting in speed increases of board solving of minimum 100%.
 
-##Graphing
+## Graphing
 
 ---
 As mentioned above, we are solving the board using the A* algorithm.
@@ -196,7 +196,7 @@ Aside from the `Board` itself, `BoardState` also stores the parent state, `curre
 Before turning to the methods of this class, we want to describe how the heuristic distance is computed.
 
 
-###Heuristics
+### Heuristics
 
 ---
 Our first heuristic logic was very simple: compute the distance between the right-end of the 'X' car and the exit. While fast to compute and implement, such approximation made the algorithm very reluctant to move the 'X' car to the left, which is often an optimal move.
@@ -305,7 +305,7 @@ Another important tweak in the heuristics, is that when creating a new board sta
 This is needed to compare the performance of A* with actual performance of bfs, as bfs should not waste time computing some heuristics. Also this supports the idea of not generating the heuristics eveytime we create a new state, as we might have already computed heuristics for such board configuration before.
 
 
-###A*
+### A*
 
 ---
 Another class in our solution is called `Graph`. It contains implementations of bfs and A* traversals.
@@ -320,7 +320,7 @@ A few things to note about our A* implementation:
 - We compute the heuristic distance for a new state, only if it isn't yet present in the `closedSet`, and we are to push this state to the `openQueue`. In other cases we would simply copy the heuristics from the board stored in the `closedSet`.
 
 
-###Getting reachable states
+### Getting reachable states
 
 ---
 Now, let's get back to the `boardState` class. The only method worth mentioning in here is
@@ -432,13 +432,14 @@ Then, we would process each of them one by one, computing the same reachable sta
 > Please recall that number of cars can go up to 18, so this little change has basically removed the `18!` constant from the code...
 
 There are people on the internet who would brag about their code solving the master puzzle in 6 seconds.
+
 Well, guess what, we have been so zealous with our optimizations, that now we are able to solve it in 0.125 seconds. By looking at only a thousand states, our code goes straight to the solution.
 
 
 ## Getting
 
 ---
-There is probably nothing else to say about our solution. Here is a guide on how to test it.
+There is probably nothing else to say about the implementation. Here is a guide on how to test it.
 
 Add your test files in the folder called `testFiles` and compile `src/rushhourtest/TestRushHour.java`, this will solve all the tests in the folder and provide a solution in the solutions folder named `Solutions`, the file is named after the test with the extension `".sol"`.
 
