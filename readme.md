@@ -43,6 +43,7 @@ Sajan Toor:
 - Rewrote projections to be far more efficent.
 - Wrote hash codes and equals for each object parsing object.
 - Wrote Solver class which is just responsible for input and ouput.
+- Refactoring code: removing any "dead" code and made things more presentable. 
 
 ---
 
@@ -74,7 +75,7 @@ The first step of the code was to parse the board. This introduces our first cla
     }
 ```
 
-[View Board.java](../blob/main/src/ParseFile/Board.java)
+[View Board.java](../main/src/ParseFile/Board.java)
 
 `Board` is responsible for parsing the file line by line, char by char. `Board` while parsing creates the other main parsing object `Car`. As shown in the main parsing algorithm here:
 
@@ -201,12 +202,12 @@ Before turning to the methods of this class, we want to describe how the heurist
 ---
 Our first heuristic logic was very simple: compute the distance between the right-end of the 'X' car and the exit. While fast to compute and implement, such approximation made the algorithm very reluctant to move the 'X' car to the left, which is often an optimal move.
 
-Next heuristic tried to also ake into account the cars blocking the way to the exit: we were increasing the approximate distance by 1 for each of such cars. This approximation was considerably better, but was giving a low performance in cases where in order to free the way, the solver needed to temporarily obstruct it by another car.
+Next heuristic tried to also take into account the cars blocking the way to the exit: we were increasing the approximate distance by 1 for each of such cars. This approximation was considerably better, but was giving a low performance in cases where in order to free the way, the solver needed to temporarily obstruct it by another car.
 
-Therefore, we have updated the heuristic to include the cars which are preventing the freeing of the main path. In order to do this, we bfs through the board, and increase the heuristic everytime a car is blocked from the front or from the back. 
+Therefore, we have updated the heuristic to include the cars which are preventing the freeing of the main path. In order to do this, we BFS through the board, and increase the heuristic everytime a car is blocked from the front or from the back. 
 While developing this heuristic we have thought of a few tweaks:
 
-- if a car obstructing the main path is of length 3, then the path can be freed only by moving this car all the way down. So we do not increase heuristic if it is blocked from above, yet we add to the bfs queue and increase the approximate distance for all the cars obstructing the way down.
+- if a car obstructing the main path is of length 3, then the path can be freed only by moving this car all the way down. So we do not increase heuristic if it is blocked from above, yet we add to the BFS queue and increase the approximate distance for all the cars obstructing the way down.
 - if a car obstructing the main path is of length 2, then, to free the path, it can either be moved 1 cell in one direction, or 2 cells in another direction. 
 ```java 
      switch (size) {
@@ -238,13 +239,13 @@ While developing this heuristic we have thought of a few tweaks:
                 }
                 break;
             }
-            }
+      }
 ```
 - We have also made an attempt to account for number of 1-step moves needed to remove a car from the main path. Unfortunately we had to abandon this idea, as the cars were very reluctant to go in the oppozite direction, even if the whole column was empty except for the car in question.
 
 Since the heuristics computation has grown to be quite sophisticated, it was to precompute it once when the state is created, then store and be able to access it in O(1). This was even further optimize in the future, and now we are computing the heuristics for the board only if:
-1) we are confident that we are going to be using it in A* traversal, and 
-2) we have not computed the heuristics for the given board configuration before
+1) We are confident that we are going to be using it in A* traversal, and 
+2) We have not computed the heuristics for the given board configuration before
 
 In the computation of the approximate distance, we needed to be able to know whether a car will hit other cars, if it were to move forward or backwards n steps.
 In order to achieve this, we have introduced these 5 methods: 
@@ -254,8 +255,7 @@ In order to achieve this, we have introduced these 5 methods:
 - `car.getMoveForwardList()`
 - `car.getMoveBackwardsList()`
 
-The first 2 were to return a copy of the Car (`null` if the projeciton goes out of the bounds of the board), but with its coordinates changed as the name suggests.
-The third is just the wrapper about the first 2, which would call both of them and return a list containing up to two non-null projections.
+The first 2 were to return a copy of the Car (`null` if the projeciton goes out of the bounds of the board), but with its coordinates changed as the name suggests. The third is just the wrapper about the first 2, which would call both of them and return a list containing up to two non-null projections.
 The last 2 would return all the possible projections if the car was to go in a given direction.
 
 These same methods were used in getting the `reachable states` for each board configuration.
@@ -301,16 +301,16 @@ public ArrayList<Car> getBlockingNStepsForwardCarList(Car[][] board) {...}
 public ArrayList<Car> getBlockingNStepsBackwardsCarList(Car[][] board) {...}
 ```
 
-Another important tweak in the heuristics, is that when creating a new board state, we added a choice to whether generate a sophisticated heuristics, or not generate a simple one/ not generate any.
-This is needed to compare the performance of A* with actual performance of bfs, as bfs should not waste time computing some heuristics. Also this supports the idea of not generating the heuristics eveytime we create a new state, as we might have already computed heuristics for such board configuration before.
+Another important tweak in the heuristics, is that when creating a new board state, we added a choice to whether generate a sophisticated heuristics, or not generate a simple one / not generate any.
+This is needed to compare the performance of A* with actual performance of BFS, as BFS should not waste time computing some heuristics. Also this supports the idea of not generating the heuristics eveytime we create a new state, as we might have already computed heuristics for such board configuration before.
 
 
-### A*
+### A* Traversal
 
 ---
-Another class in our solution is called `Graph`. It contains implementations of bfs and A* traversals.
+Another class in our solution is called `Graph`. It contains implementations of BFS and A* traversals.
 
-We will not talk about bfs, as it is a simple algorithm, and we did not add any modifications to it.
+We will not talk about BFS, as it is a simple algorithm, and we did not add any modifications to it.
 
 A few things to note about our A* implementation:
 
@@ -320,7 +320,7 @@ A few things to note about our A* implementation:
 - We compute the heuristic distance for a new state, only if it isn't yet present in the `closedSet`, and we are to push this state to the `openQueue`. In other cases we would simply copy the heuristics from the board stored in the `closedSet`.
 
 
-### Getting reachable states
+### Getting Reachable States
 
 ---
 Now, let's get back to the `boardState` class. The only method worth mentioning in here is
@@ -335,9 +335,9 @@ public ArrayList<BoardState> getReachableStates(boolean shouldCreateDecentHeuris
 `shouldCreateDecentHeuristics`, as name suggests, represents whether sophisticated heuristic should be computed for the boards upon creation, or no.
 
 The functionality of this method is rather straighforward: generate all possible car projections based on the `carList`, and generate new board states based on the new carList.
-The projections are generated via the methods like `car.getMoveForwardList(char[][] board)` and `car.getMoveBackwardsList(char[][] board)`. These are the optimized versions of those mentioned in heuristics computation. The main difference is that now they return only the permissible projections (i.e. without wrecks) and use a `char[][] board` argument to do so fast.
+The projections are generated via the methods like `Car.getMoveForwardList(char[][] board)` and `Car.getMoveBackwardsList(char[][] board)`. These are the optimized versions of those mentioned in heuristics computation. The main difference is that now they return only the permissible projections (i.e. without wrecks) and use a `char[][] board` argument to do so fast.
 
-`car.getMoveBackwardsProjection` and `car.getMoveForwardProjection` now return a new class called `CarProjection`, which is fundamentally a wrapper around `Car`, but also stores the `char[][] board`, so that we can generate next step projections from a given projection easily.
+`Car.getMoveBackwardsProjection` and `Car.getMoveForwardProjection` now return a new class called `CarProjection`, which is fundamentally a wrapper around `Car`, but also stores the `char[][] board`, so that we can generate next step projections from a given projection easily.
 
 There are 2 things we would like to note about this method.
 
@@ -368,15 +368,15 @@ First, looking at this method one is likely to think that it breaks the DRY (Don
  }
 ```
 
-The reason we did not "merge" it into one loop is, once again, because we were looking to optimize things as mch as possible. We know that processors actually execute everything not sequentially, but concurrently. That said, loops on linked lists normally cannot be run concurrently, as values in each iteration depends (value of LLnode pointer) on the value of a previous iteration.
+The reason we did not "merge" it into one loop is, once again, because we were looking to optimize things as much as possible. We know that processors actually execute everything not sequentially, but concurrently. That said, loops on linked lists normally cannot be run concurrently, as values in each iteration depends (value of LLnode pointer) on the value of a previous iteration.
 
-If we have 2 loops, however, the processor can do iteration of each loops in the same clock cycle, with should speed things up, at least in theory (unfortunately, we are not familiar with the way java compiler works).
+If we have 2 loops, however, the processor can do iteration of each loops in the same clock cycle, with should speed things up, at least in theory (unfortunately, we are not familiar with the way Java compiler works).
 
 
 The second thing we wanted to talk about here is an extremely hard to notice bug, that was slowing the performance by more than 9000%, which, to be completely frank, we fixed on accident.
 The way we were generating the carList for projections of a given car was:
 
-- remove the `car` for the copy of the list
+- remove the `Car` for the copy of the list
 ```java
     var restOfTheCarsStream = carList.stream().filter(c -> !c.equals(car));
     var restOfTheCars = restOfTheCarsStream.collect(Collectors.toList());
@@ -395,7 +395,7 @@ After applying myriads of optimizations to our code, and still not able to pass 
 
 By luck, or by some Programming God providence, Sajan decided to stop trusting the promised performance of Java Streams, and so he has re-written the above lines as follows:
 
-- find the index of a needed `car` in the list
+- find the index of a needed `Car` in the list
 ```java
 // get index of car, linear search
 for (int i = 0; i < size; i++) {
@@ -405,7 +405,7 @@ for (int i = 0; i < size; i++) {
     }
 }
 ```
-- for each `carProjection`, clone the list, and change the element at index to the projection
+- for each `CarProjection`, clone the list, and change the element at index to the projection
 ```java
 var nextList = carListClone(carList);
 nextList.set(index, forwardProjection);
@@ -424,19 +424,19 @@ Imagine the looks on our faces, considering we have spent more than 40 hours of 
 It took us a few days to figure out what has happened. Allow us to explain:
 
 Consider a car list `[A, X, Q]`, and let `X'` be a projection of `X`. Then, to generate next state, our algorithm would remove `X`, and add `X'` to the end, resulting in the list `[A, Q, X']`.
-Then, later on, if we were to make a projeciton of the car A on this board, we would get the list `[Q, X', A']`.
-Alternatively, if we were first to make a projeciton of `A`, and based on that make a projection on `X`, we would get `[Q, X, A']` and then `[Q, A', X']`. These two lists are not equal, and so their hashes are not equal either. Then, we would have 2 states with the same board configuration and hence the same heuristic, but different hashes.
-A list on `n` cars has `n!` permutations. By creating all the possible states, we were very likely to generate perhaps not exactly a factorial, but still an <b>enormous</b> number of literally the same states.
+Then, later on, if we were to make a projection of the car A on this board, we would get the list `[Q, X', A']`.
+Alternatively, if we were first to make a projection of `A`, and based on that make a projection on `X`, we would get `[Q, X, A']` and then `[Q, A', X']`. These two lists are not equal, and so their hashes are not equal either. Then, we would have 2 states with the same board configuration and hence the same heuristic, but different hashes.
+A list on `n` cars has `n!` permutations. By creating all the possible states, we were very likely to generate perhaps not exactly a factorial, but still an **enormous** number of literally the same states.
 Then, we would process each of them one by one, computing the same reachable states over and over again.
 
 > Please recall that number of cars can go up to 18, so this little change has basically removed the `18!` constant from the code...
 
-There are people on the internet who would brag about their code solving the master puzzle in 6 seconds.
+There are people on the internet who would brag about their code solving the hardest puzzle in 6 seconds.
 
 Well, guess what, we have been so zealous with our optimizations, that now we are able to solve it in 0.125 seconds. By looking at only a thousand states, our code goes straight to the solution.
 
 
-## Getting
+## Getting Started
 
 ---
 There is probably nothing else to say about the implementation. Here is a guide on how to test it.
