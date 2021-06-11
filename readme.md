@@ -24,7 +24,7 @@
     </td>
 </table>
 
-## Contributions from Each Person
+<!-- ## Contributions from Each Person
 
 ---
 
@@ -47,9 +47,30 @@ Sajan Toor:
 
 ---
 
-Overall work was split pretty evenly with about 50 - 50 contributions in terms of number of additions and deletions. We didn't just strictly do what was listed, there was some overlap, but these were our main contributions. 
+Overall work was split pretty evenly with about 50 - 50 contributions in terms of number of additions and deletions. We didn't just strictly do what was listed, there was some overlap, but these were our main contributions.  -->
 
 ## About
+
+Given a valid Rush Hour board file as an input for example: 
+```
+AA...O
+.....O
+XX...O
+...QQQ
+....CC
+..RRR.
+```
+
+We need to output its solution: 
+```
+XR3
+QL3
+CL1
+OD3
+XR1
+```
+> Where the first letter in each line is the car, second is the direction and third is the number of steps in said direction.
+
 
 The basic idea was to parse the board, create easily modifiable board objects which could be used to create projections and new states and traverse said states using BFS, DFS or A* until a solved state was found. Pretty quickly we decided on using the A* algorithm since we could use heuristics to speed things up and make finding the solution faster. The basic overview of the heuristic is finding the distance from the "X" car is to the end and then figure out which cars are blocking the way and recursively figure out which of those cars are blocked.
 
